@@ -42,3 +42,18 @@ export const remDept = provideApolloClient(client)(() => useMutation(gql`
         remDept(id: $id)
     }`
 ))
+
+/**
+ * 编辑部门
+ */
+export const editDept = provideApolloClient(client)(() => useMutation(gql`
+    mutation editDept($dept: EditDeptDTO!){ 
+        editDept(dept: $dept) {
+            id
+            name
+            pid
+            pname
+            sort
+        }
+    }`
+))

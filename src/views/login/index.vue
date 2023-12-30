@@ -50,72 +50,6 @@
                   loadingIcon="layui-icon-loading" @click="loginSubmit">登录</lay-button>
               </lay-form-item>
             </div>
-            <!-- <lay-tab type="brief" v-model="method">
-              <lay-tab-item title="账号登录" id="1">
-                <div style="height: 250px">
-                  <lay-form-item :label-width="0">
-                    <lay-input :allow-clear="true" prefix-icon="layui-icon-username" placeholder="用户名"
-                      v-model="loginForm.account"></lay-input>
-                  </lay-form-item>
-                  <lay-form-item :label-width="0">
-                    <lay-input :allow-clear="true" prefix-icon="layui-icon-password" placeholder="密码" password
-                      type="password" v-model="loginForm.password"></lay-input>
-                  </lay-form-item>
-                  <lay-form-item :label-width="0">
-                    <div style="width: 264px; display: inline-block">
-                      <lay-input :allow-clear="true" prefix-icon="layui-icon-vercode" placeholder="验证码"
-                        v-model="loginForm.vercode"></lay-input>
-                    </div>
-
-                    <div class="login-captach" @click="toRefreshImg">
-                      <img style="width: 100%" src="../../assets/login/login-yzm.jpg" alt="获取验证码" />
-                    </div>
-                  </lay-form-item>
-                  <lay-checkbox value="" name="like" v-model="remember" skin="primary" label="1">记住密码</lay-checkbox>
-                  <lay-form-item :label-width="0">
-                    <lay-button style="margin-top: 20px" type="primary" :loading="loging" :fluid="true"
-                      loadingIcon="layui-icon-loading" @click="loginSubmit">登录</lay-button>
-                  </lay-form-item>
-                </div>
-              </lay-tab-item>
-              <lay-tab-item title="快捷登录" id="2">
-                <div style="width: 200px; height: 250px; margin: 0 auto">
-                  <lay-qrcode text="http://www.layui-vue.com" :width="200" color="#000"
-                    style="margin: 10px 0 20px"></lay-qrcode>
-                  <div style="text-align: center; cursor: pointer" @click="toRefreshQrcode">
-                    <lay-icon type="layui-icon-refresh-three"> </lay-icon>
-                    刷新二维码
-                  </div>
-                </div>
-              </lay-tab-item>
-            </lay-tab> -->
-            <!-- <lay-line>Other login methods</lay-line>
-            <ul class="other-ways">
-              <li>
-                <div class="line-container">
-                  <img class="icon" src="../../assets/login/w.svg" />
-                  <p class="text">微信</p>
-                </div>
-              </li>
-              <li>
-                <div class="line-container">
-                  <img class="icon" src="../../assets/login/q.svg" />
-                  <p class="text">钉钉</p>
-                </div>
-              </li>
-              <li>
-                <div class="line-container">
-                  <img class="icon" src="../../assets/login/a.svg" />
-                  <p class="text">Gitee</p>
-                </div>
-              </li>
-              <li>
-                <div class="line-container">
-                  <img class="icon" src="../../assets/login/f.svg" />
-                  <p class="text">Github</p>
-                </div>
-              </li>
-            </ul> -->
           </div>
         </div>
       </div>
@@ -136,9 +70,6 @@ export default defineComponent({
     const router = useRouter()
     const userStore = useUserStore()
     const method = ref('1')
-    const verificationImgUrl = ref('')
-    const loging = ref(false);
-    const loginQrcodeText = ref('')
     const remember = ref(false)
     const loginForm = reactive({
       username: '',

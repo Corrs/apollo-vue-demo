@@ -27,8 +27,8 @@
         >
         <lay-popconfirm
           content="确定要删除此组织吗?"
-          @confirm="confirm"
-          @cancel="cancel"
+          position="right"
+          @confirm="delDept(row.id)"
         >
           <lay-button size="xs" border="red" border-style="dashed"
             >删除</lay-button
@@ -43,14 +43,14 @@
             <lay-input v-model.trim="model11.name" placeholder="请输入名称，最多50字"></lay-input>
           </lay-form-item>
           <lay-form-item label="上级部门" prop="pid">
-            <lay-tree-select v-model="model11.pid" :data="treeSelectData" :minCollapsedNum="0" placeholder="请选择"></lay-tree-select>
+            <lay-tree-select v-model="model11.pid" :data="dataSource" :minCollapsedNum="0" placeholder="请选择"></lay-tree-select>
           </lay-form-item>
           <lay-form-item label="排序" prop="sort">
             <lay-input-number v-model.number="model11.sort" position="right"></lay-input-number>
           </lay-form-item>
         </lay-form>
         <div style="width: 100%; text-align: center">
-          <lay-button size="sm" type="primary" @click="toSubmit" :loading="addDeptLoading">保存</lay-button>
+          <lay-button size="sm" type="primary" @click="toSubmit" :loading="addDeptLoading || editDeptLoading">保存</lay-button>
           <lay-button size="sm" @click="toCancel">取消</lay-button>
         </div>
       </div>
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { layer } from '@layui/layui-vue'
-import { depts, addDept, DEPTS } from '../../../api/module/system'
+import { depts, addDept, DEPTS, remDept, editDept } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
 import { successMsg, errorMsg } from '../../../library/msgUtil'
 
@@ -76,7 +76,7 @@ const columns = ref([
     fixed: 'right'
   }
 ])
-const { result: dpetsResult, loading: deptsLoading, load: loadDepts, refetch: refetchDepts } = depts
+const { result: dpetsResult, loading: deptsLoading, load: loadDepts } = depts
 onMounted(() => {
   loadDepts()
 })
@@ -86,29 +86,13 @@ const dataSource = computed(() => {
   if (Array.isArray(list)) {
     const treeList = list.map(e => {
       return {
-        ...e
-      }
-    })
-    return listToTree(treeList, 0)
-  }
-  return []
-})
-const treeSelectData = computed(() => {
-  const list = dpetsResult.value?.depts
-  if (Array.isArray(list)) {
-    const treeList = list.map(e => {
-      return {
-        id: e.id,
-        pid: e.pid,
+        ...e,
         title: e.name
       }
     })
     return listToTree(treeList, 0)
   }
-  return [{
-    id: 0,
-    title: '一级机构'
-  }]
+  return []
 })
 
 const model11 = ref({
@@ -123,6 +107,10 @@ const changeVisible11 = (text: any, row: any) => {
   title.value = text
   if (row != null) {
     let info = JSON.parse(JSON.stringify(row))
+    delete info.__typename
+    delete info.pname
+    delete info.title
+    delete info.children
     model11.value = info
   } else {
     model11.value = {
@@ -134,21 +122,33 @@ const changeVisible11 = (text: any, row: any) => {
   visible11.value = !visible11.value
 }
 
-// 清除校验
-const clearValidate11 = function () {
-  layFormRef11.value.clearValidate()
-}
-// 重置表单
-const reset11 = function () {
-  layFormRef11.value.reset()
-}
-
-const { onDone: addDeptDone, loading: addDeptLoading, mutate: addDeptMutate } = addDept
+const { loading: addDeptLoading, mutate: addDeptMutate } = addDept
+const { loading: editDeptLoading, mutate: editDeptMutate } = editDept
 function toSubmit() {
   layFormRef11.value.validate((isValidate: any, model: any, errors: any) => {
     if (isValidate) {
       if (model.id) {
         // 编辑
+        editDeptMutate({
+          dept: model
+        }, {
+          update: (cache, { data: { editDept } }) => {
+            if (editDept) {
+              let data = cache.readQuery({ query: DEPTS })
+              const deptsCache = data.depts
+              const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === model.id), 1, editDept)
+              data = {
+                ...data,
+                depts: [
+                  ...depts
+                ],
+              }
+              successMsg('保存成功')
+              cache.writeQuery({ query: DEPTS, data })
+              visible11.value = false
+            }
+          }
+        })
       } else {
         // 新增
         addDeptMutate({
@@ -167,8 +167,8 @@ function toSubmit() {
                 addDept,
               ],
             }
-            cache.writeQuery({ query: DEPTS, data })
             successMsg('保存成功')
+            cache.writeQuery({ query: DEPTS, data })
             visible11.value = false
           }
         })
@@ -179,12 +179,34 @@ function toSubmit() {
 function toCancel() {
   visible11.value = false
 }
-function confirm() {
-  layer.msg('您已成功删除')
+// 删除部门数据代码逻辑 start
+const { mutate: remDeptMutate } = remDept
+function delDept(id: number) {
+  // 需要查看是否有子部门，如果有子部门，不允许删除
+  const list = dpetsResult.value?.depts
+  if (list.findIndex((e: any) => e.pid === id) > -1) {
+    errorMsg('请先删除子机构')
+  } else {
+    remDeptMutate({id}, {
+      update: (cache, { data: { remDept } }) => {
+        if (remDept) {
+          let data = cache.readQuery({ query: DEPTS })
+          const deptsCache = data.depts
+          const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === id), 1)
+          data = {
+            ...data,
+            depts: [
+              ...depts
+            ],
+          }
+          successMsg('删除成功')
+          cache.writeQuery({ query: DEPTS, data })
+        }
+      }
+    })
+  }
 }
-function cancel() {
-  layer.msg('您已取消操作')
-}
+// 删除部门数据代码逻辑 end
 
 </script>
 
