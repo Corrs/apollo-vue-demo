@@ -54,6 +54,7 @@ declare module '@vue/runtime-core' {
     LaySelect: typeof import('@layui/layui-vue')['LaySelect']
     LaySelectOption: typeof import('@layui/layui-vue')['LaySelectOption']
     LaySide: typeof import('@layui/layui-vue')['LaySide']
+    LaySpace: typeof import('@layui/layui-vue')['LaySpace']
     LayStep: typeof import('@layui/layui-vue')['LayStep']
     LayStepItem: typeof import('@layui/layui-vue')['LayStepItem']
     LaySubMenu: typeof import('@layui/layui-vue')['LaySubMenu']

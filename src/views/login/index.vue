@@ -9,19 +9,49 @@
         <div class="login-container">
           <div class="login-side">
             <div class="login-bg-title">
-              <h1>layui vue admin</h1>
+              <h1>澳洲呼叫中心</h1>
 
               <h3 style="margin: 20px auto">
-                开 箱 即 用 的 layui vue 企 业 级 前 端 模 板
+                管理平台
               </h3>
             </div>
           </div>
           <div class="login-ID">
-            <div style="font-size: 22px; margin-bottom: 15px; margin-top: 5px">
-              🎯 Sign in
+            <div style="font-size: 22px; margin-bottom: 30px; margin-top: 80px; text-align: center;">
+              <!-- 🎯 Sign in -->登录
             </div>
-            <lay-tab type="brief" v-model="method">
-              <lay-tab-item title="用户名" id="1">
+            <div style="height: 250px">
+              <lay-form-item :label-width="0">
+                <lay-input :allow-clear="true" prefix-icon="layui-icon-username" placeholder="用户名"
+                  v-model="loginForm.username"></lay-input>
+              </lay-form-item>
+              <lay-form-item :label-width="0">
+                <lay-input :allow-clear="true" prefix-icon="layui-icon-password" placeholder="密码" password
+                  type="password" v-model="loginForm.password"></lay-input>
+              </lay-form-item>
+              <lay-form-item :label-width="0">
+                <div style="width: 264px; display: inline-block">
+                  <lay-input :allow-clear="true" prefix-icon="layui-icon-vercode" placeholder="验证码"
+                    v-model="loginForm.captcha"></lay-input>
+                </div>
+
+                <lay-space class="login-captach" @click="refetchCaptcha()" >
+                  <lay-tooltip content="点击刷新验证码，验证码有效期5分钟">
+                    <img style="width: 100%" :src="captchaResult?.loginCaptcha?.image" alt="获取验证码" />
+                  </lay-tooltip>
+                </lay-space>
+                <!-- <div class="login-captach" title="点击刷新验证码" @click="refetchCaptcha()">
+                  <img style="width: 100%" :src="captchaResult?.loginCaptcha?.image" alt="获取验证码" />
+                </div> -->
+              </lay-form-item>
+              <!-- <lay-checkbox value="" name="like" v-model="remember" skin="primary" label="1">记住密码</lay-checkbox> -->
+              <lay-form-item :label-width="0">
+                <lay-button style="margin-top: 20px" type="primary" :loading="loging" :fluid="true"
+                  loadingIcon="layui-icon-loading" @click="loginSubmit">登录</lay-button>
+              </lay-form-item>
+            </div>
+            <!-- <lay-tab type="brief" v-model="method">
+              <lay-tab-item title="账号登录" id="1">
                 <div style="height: 250px">
                   <lay-form-item :label-width="0">
                     <lay-input :allow-clear="true" prefix-icon="layui-icon-username" placeholder="用户名"
@@ -48,7 +78,7 @@
                   </lay-form-item>
                 </div>
               </lay-tab-item>
-              <lay-tab-item title="二维码" id="2">
+              <lay-tab-item title="快捷登录" id="2">
                 <div style="width: 200px; height: 250px; margin: 0 auto">
                   <lay-qrcode text="http://www.layui-vue.com" :width="200" color="#000"
                     style="margin: 10px 0 20px"></lay-qrcode>
@@ -58,8 +88,8 @@
                   </div>
                 </div>
               </lay-tab-item>
-            </lay-tab>
-            <lay-line>Other login methods</lay-line>
+            </lay-tab> -->
+            <!-- <lay-line>Other login methods</lay-line>
             <ul class="other-ways">
               <li>
                 <div class="line-container">
@@ -85,7 +115,7 @@
                   <p class="text">Github</p>
                 </div>
               </li>
-            </ul>
+            </ul> -->
           </div>
         </div>
       </div>
@@ -94,11 +124,11 @@
 </template>
 
 <script lang="ts">
-import { login } from '../../api/module/user'
-import { verificationImg, loginQrcode } from '../../api/module/commone'
-import { defineComponent, onMounted, reactive, ref } from 'vue'
+import { loginCaptcha, loginMutation } from '../../api/module/login'
+import { defineComponent, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../store/user'
+import md5 from 'js-md5'
 import { layer } from '@layui/layer-vue'
 
 export default defineComponent({
@@ -111,60 +141,63 @@ export default defineComponent({
     const loginQrcodeText = ref('')
     const remember = ref(false)
     const loginForm = reactive({
-      account: 'admin',
-      password: '123456',
-      vercode: 'DqJFN'
+      username: '',
+      password: '',
+      captcha: ''
+    })
+    const CAPTCHA_KEY = 'captchaKey'
+
+    const { result: captchaResult, refetch: refetchCaptcha, load: loadCaptcha } = loginCaptcha
+    onMounted(() => {
+      userStore.clear()
+      loadCaptcha()
+    })
+    watch(captchaResult, value => {
+      // 缓存captchaKey，在请求头中携带，登录成功后删除
+      localStorage.setItem(CAPTCHA_KEY, value?.loginCaptcha?.key)
     })
 
-    onMounted(() => {
-      // toRefreshImg()
-      // toRefreshQrcode()
-    })
+    const { mutate: login, onDone: loginDone, loading: loginLoading, onError: loginError } = loginMutation
 
     const loginSubmit = async () => {
-      loging.value = true;
-      login(loginForm).then(({ data, code, msg }) => {
-        setTimeout(() => {
-          loging.value = false;
-          if (code == 200) {
-            layer.msg(msg, { icon: 1 }, async () => {
-              userStore.token = data.token
-              await userStore.loadMenus()
-              await userStore.loadPermissions()
-              router.push('/')
-            })
-          } else {
-            layer.msg(msg, { icon: 2 })
+      const loginParam = {
+        ...loginForm,
+        password: md5(md5(loginForm.password))
+      }
+      login(loginParam)
+      loginDone(result => {
+        const data = result.data?.login
+        if (data) {
+          layer.msg("登录成功", { icon: 1 }, async () => {
+            localStorage.removeItem(CAPTCHA_KEY)
+            userStore.userInfo = data.user
+            userStore.token = data.authenticationToken
+            await userStore.loadMenus()
+            await userStore.loadPermissions()
+            router.push('/')
+          })
+        }
+      })
+      loginError(err => {
+        const graphQLErrors = err.graphQLErrors
+        if (graphQLErrors?.length??0) {
+          const gError = graphQLErrors[0]
+          if (gError.extensions?.errCode === 'LOGIN_CAPTCHA_EXPIRE') {
+            // 验证码过期
+            refetchCaptcha()
           }
-        }, 1000)
+        }
       })
     }
 
-    const toRefreshImg = async () => {
-      let { data, code, msg } = await verificationImg()
-      if (code == 200) {
-        verificationImgUrl.value = data.data
-      } else {
-        layer.msg(msg, { icon: 2 })
-      }
-    }
-    const toRefreshQrcode = async () => {
-      let { data, code, msg } = await loginQrcode()
-      if (code == 200) {
-        loginQrcodeText.value = data.data
-      } else {
-        layer.msg(msg, { icon: 2 })
-      }
-    }
-
     return {
-      toRefreshQrcode,
-      toRefreshImg,
+      captchaResult,
+      refetchCaptcha,
       loginSubmit,
       loginForm,
       remember,
       method,
-      loging
+      loging: loginLoading
     }
   }
 })

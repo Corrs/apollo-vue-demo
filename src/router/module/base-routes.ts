@@ -4,40 +4,21 @@ import Login from '../../views/login/index.vue';
 
 export default [
   {
-    path: '/',
-    redirect: '/workSpace'
-  },
-  {
     path: '/login',
     component: Login,
     meta: { title: '登录页面' },
   },
   {
-    path: '/workspace',
-    redirect: '/workspace/workbench',
+    path: '/',
+    redirect: '/home',
     component: BaseLayout,
-    meta: { title: '工作空间' },
+    meta: { title: '工作台' },
     children: [
       {
-        path: '/workspace/workbench',
-        name: 'Workbench',
+        path: '/home',
+        name: 'Home',
         component: () => import('../../views/workSpace/workbench/index.vue'),
-        meta: { title: '工作台', requireAuth: true, affix: true, closable: false },
-      },
-      {
-        path: '/workspace/console',
-        component: () => import('../../views/workSpace/console/index.vue'),
-        meta: { title: '控制台', requireAuth: true },
-      },
-      {
-        path: '/workspace/analysis',
-        component: () => import('../../views/workSpace/analysis/index.vue'),
-        meta: { title: '分析页', requireAuth: true },
-      },
-      {
-        path: '/workspace/monitor',
-        component: () => import('../../views/workSpace/monitor/index.vue'),
-        meta: { title: '监控页', requireAuth: true },
+        meta: { title: '首页', requireAuth: true, affix: true, closable: false },
       }
     ]
   }, {

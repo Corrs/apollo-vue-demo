@@ -23,7 +23,7 @@
         :width="sideWidth"
         :class="appStore.sideTheme == 'dark' ? 'dark changeBgc' : 'light'"
       >
-        <lay-logo v-if="appStore.logo"></lay-logo>
+        <lay-logo class="lay-logo-text" v-if="appStore.logo">澳洲呼叫中心</lay-logo>
         <div class="side-menu-wrapper">
           <div
             class="side-menu1"
@@ -50,7 +50,7 @@
       </lay-side>
       <lay-layout style="width: 0px">
         <!-- 布局头部 -->
-        <lay-header style="display: flex">
+        <lay-header style="display: flex;">
           <lay-menu class="layui-layout-left">
             <lay-menu-item @click="collapse">
               <lay-icon
@@ -106,7 +106,7 @@
             </template>
           </lay-dropdown>
           <lay-menu class="layui-layout-right">
-            <lay-menu-item>
+            <!-- <lay-menu-item>
               <lay-fullscreen v-slot="{ toggle, isFullscreen }">
                 <lay-icon
                   @click="toggle()"
@@ -117,7 +117,7 @@
                   "
                 ></lay-icon>
               </lay-fullscreen>
-            </lay-menu-item>
+            </lay-menu-item> -->
             <lay-menu-item>
               <global-message-tab :flag="flag">
                 <lay-icon
@@ -126,7 +126,7 @@
                 ></lay-icon>
               </global-message-tab>
             </lay-menu-item>
-            <lay-menu-item>
+            <!-- <lay-menu-item>
               <lay-dropdown updateAtScroll placement="bottom">
                 <lay-icon type="layui-icon-website"></lay-icon>
                 <template #content>
@@ -144,7 +144,7 @@
                   </lay-dropdown-menu>
                 </template>
               </lay-dropdown>
-            </lay-menu-item>
+            </lay-menu-item> -->
             <lay-menu-item>
               <lay-dropdown updateAtScroll placement="bottom">
                 <lay-icon type="layui-icon-username"></lay-icon>
@@ -158,15 +158,15 @@
                     </lay-dropdown-menu-item>
                     <lay-line></lay-line>
                     <lay-dropdown-menu-item @click="logOut">
-                      <template #default>注销登录</template>
+                      <template #default>退出登录</template>
                     </lay-dropdown-menu-item>
                   </lay-dropdown-menu>
                 </template>
               </lay-dropdown>
             </lay-menu-item>
-            <lay-menu-item @click="changeVisible">
+            <!-- <lay-menu-item @click="changeVisible">
               <lay-icon type="layui-icon-more-vertical"></lay-icon>
-            </lay-menu-item>
+            </lay-menu-item> -->
           </lay-menu>
         </lay-header>
         <lay-body>
@@ -185,7 +185,7 @@
         <lay-footer></lay-footer>
       </lay-layout>
     </lay-layout>
-    <global-setup v-model="visible"></global-setup>
+    <!-- <global-setup v-model="visible"></global-setup> -->
   </lay-config-provider>
 </template>
 
@@ -266,9 +266,9 @@ export default {
     }
 
     const logOut = () => {
+      // todo 调用后端接口退出登录
       const userInfoStore = useUserStore()
-      userInfoStore.token = ''
-      userInfoStore.userInfo = {}
+      userInfoStore.logout()
       router.push('/login')
     }
 
@@ -322,6 +322,14 @@ export default {
     position: absolute;
     height: 100vh;
   }
+}
+
+.lay-logo-text {
+  color: #fff !important; 
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  overflow: hidden;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 /*鼠标经过背景色，增加了improtant，否则设置无效*/

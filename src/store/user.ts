@@ -23,6 +23,16 @@ export const useUserStore = defineStore({
       if(code == 200) {
         this.permissions = data;
       }
+    },
+    clear() {
+      this.token = ''
+      this.userInfo = {}
+      this.permissions = []
+      this.menus = []
+    },
+    logout() {
+      this.token = ''
+      this.userInfo = {}
     }
   },
   persist: {

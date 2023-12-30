@@ -54,17 +54,20 @@ export const treeToList = function (arr: any[]){
   return res;
 }
 
-export const listToTree = function(arr:any[]) {
+export const listToTree = function(arr:any[], root:any, col:string = 'id', refCol:string = 'pid', sortCol:string = 'sort') {
     arr.forEach(e => {
       arr.forEach(y => { 
-        if (y.parentId == e.id) { 
+        if (y[refCol] == e[col]) { 
           if (!e.children) {
             e.children = []
           }
           e.children.push(y)
+          if (e.children.length > 1) {
+            e.children.sort((e1, e2) => e1[sortCol]-e2[sortCol])
+          }
         }
       })
     })
-    arr = arr.filter(ele => ele.parentId === null)
+    arr = arr.filter(ele => ele[refCol] === root).sort((e1, e2) => e1[sortCol]-e2[sortCol])
     return arr
 }

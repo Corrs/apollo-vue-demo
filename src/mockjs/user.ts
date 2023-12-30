@@ -8,29 +8,14 @@ let user: User = {
 
 const menus = [
   {
-    id: "/workspace",
-    icon: "layui-icon-home",
-    title: "工作空间",
+    id: "/",
+    icon: "layui-icon-desktop",
+    title: "工作台",
     children: [
       {
-        id: "/workspace/workbench",
-        icon: "layui-icon-util",
-        title: "工作台"
-      },
-      {
-        id: "/workspace/console",
-        icon: "layui-icon-engine",
-        title: "控制台"
-      },
-      {
-        id: "/workspace/analysis",
-        icon: "layui-icon-chart-screen",
-        title: "分析页"
-      },
-      {
-        id: "/workspace/monitor",
-        icon: "layui-icon-find-fill",
-        title: "监控页"
+        id: "/home",
+        icon: "layui-icon-home",
+        title: "首页"
       }
     ]
   },
@@ -282,7 +267,8 @@ const getPermission = (req: any, res: any) => {
   let result: Result = {
     code: 200,
     msg: "操作成功",
-    data: ['sys:user:add', 'sys:user:edit', 'sys:user:delete', 'sys:user:import', 'sys:user:export'],
+    // data: ['sys:user:add', 'sys:user:edit', 'sys:user:delete', 'sys:user:import', 'sys:user:export'],
+    data: ['sys:user:add', 'sys:user:edit', 'sys:user:delete', 'sys:user:import'],
     success: true
   }
   if (item || token) {

@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { LayuiVueResolver } from 'unplugin-vue-components/resolvers'
-import { resolve } from "path";
+import { resolve } from "path"
 
 const excludeComponents = ['LightIcon','DarkIcon']
 
@@ -32,4 +32,9 @@ export default defineConfig({
     }),
     vue(),
   ],
+  define: {
+    'process.env': {
+      'BASE_URI': 'http://localhost:8080/graphql'
+    }
+  }
 });

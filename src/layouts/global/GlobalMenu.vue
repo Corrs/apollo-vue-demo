@@ -7,6 +7,7 @@
     :theme="appStore.sideTheme"
     :openKeys="openKeys"
     :selectedKey="selectedKey"
+    indent
     @changeOpenKeys="changeOpenKeys"
     @changeSelectedKey="changeSelectedKey"
   >

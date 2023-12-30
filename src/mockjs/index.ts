@@ -1,5 +1,5 @@
 // @ts-ignore
-import Mock from'mockjs';
+import Mock from 'mockjs';
 import user from './user';
 
 Mock.mock(/\/user\/login/,'post',(req: any,res: any) =>{

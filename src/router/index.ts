@@ -25,6 +25,11 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   NProgress.start();
 
   const userStore = useUserStore();
+  // token不存在，且目标路径不是login，返回到登录页
+  if (!userStore.token && !to.path.startsWith('/login')) {
+    next({path: '/login'})
+    return;
+  }
 
   if(to.meta.requireAuth) {
     next();
