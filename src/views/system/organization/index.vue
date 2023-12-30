@@ -4,7 +4,8 @@
       children-column-name="children" 
       :columns="columns"
       :loading="deptsLoading"
-      :data-source="dataSource" 
+      :data-source="dataSource"
+      :default-expand-all="defaultExpandAll"
       :default-toolbar="false" 
       :expand-index="0"
       :height="'100%'"
@@ -16,6 +17,7 @@
           @click="changeVisible11('新增', null)"
           >新增</lay-button
         >
+        <lay-button size="sm" @click="() => {defaultExpandAll=!defaultExpandAll}">{{ defaultExpandAll ? '收起全部':'全部展开'}}</lay-button>
       </template>
       <template v-slot:operator="{ row }">
         <lay-button
@@ -42,8 +44,8 @@
           <lay-form-item label="名称" prop="name">
             <lay-input v-model.trim="model11.name" placeholder="请输入名称，最多50字"></lay-input>
           </lay-form-item>
-          <lay-form-item label="上级部门" prop="pid">
-            <lay-tree-select v-model="model11.pid" :data="dataSource" :minCollapsedNum="0" placeholder="请选择"></lay-tree-select>
+          <lay-form-item label="上级机构" prop="pid">
+            <lay-tree-select v-model="model11.pid" :data="selectTreeData" placeholder="请选择"></lay-tree-select>
           </lay-form-item>
           <lay-form-item label="排序" prop="sort">
             <lay-input-number v-model.number="model11.sort" position="right"></lay-input-number>
@@ -58,12 +60,12 @@
   </lay-container>
 </template>
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import { layer } from '@layui/layui-vue'
+import { ref, onMounted, computed } from 'vue'
 import { depts, addDept, DEPTS, remDept, editDept } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
 import { successMsg, errorMsg } from '../../../library/msgUtil'
 
+const defaultExpandAll = ref(false)
 const columns = ref([
   { title: '名称', width: '180px', key: 'name', fixed: 'left' },
   { title: '上级部门', width: '120px', key: 'pname', fixed: 'left' },
@@ -95,8 +97,29 @@ const dataSource = computed(() => {
   return []
 })
 
+const selectTreeData = computed(() => {
+  const list = dpetsResult.value?.depts
+  let children = []
+  if (Array.isArray(list)) {
+    const treeList = list.map(e => {
+      return {
+        ...e,
+        title: e.name,
+        spread: e.pid === 0
+      }
+    })
+    children = listToTree(treeList, 0)
+  }
+  return [{
+    id: 0,
+    title: '一级机构',
+    spread: true,
+    children
+  }]
+})
+
 const model11 = ref({
-  pid: 1,
+  pid: 0,
   name: '',
   sort: 0
 })
@@ -116,7 +139,7 @@ const changeVisible11 = (text: any, row: any) => {
     model11.value = {
       name: '',
       sort: 0,
-      pid: 1
+      pid: 0
     }
   }
   visible11.value = !visible11.value
