@@ -17,6 +17,10 @@ export const loginMutation = provideApolloClient(client)(() => useMutation(gql`
             authenticationToken
             user {
                 username
+                realName
+                avatar
+                deptId
+                superAdmin
                 userId
                 email
                 mobile
@@ -24,3 +28,5 @@ export const loginMutation = provideApolloClient(client)(() => useMutation(gql`
         }
     }`
 ))
+
+export const logoutMutation = provideApolloClient(client)(() => useMutation(gql`mutation logout { logout }`))

@@ -204,6 +204,7 @@ import { useRouter } from 'vue-router'
 import { useMenu } from './composable/useMenu'
 import zh_CN from '../lang/zh_CN'
 import en_US from '../lang/en_US'
+import { logoutMutation } from '../api/module/login'
 
 export default {
   components: {
@@ -265,11 +266,15 @@ export default {
       }, 500)
     }
 
+    const { mutate: logout, onDone: logoutDone } = logoutMutation
+
     const logOut = () => {
-      // todo 调用后端接口退出登录
-      const userInfoStore = useUserStore()
-      userInfoStore.logout()
-      router.push('/login')
+      logout()
+      logoutDone(() => {
+        const userInfoStore = useUserStore()
+        userInfoStore.logout()
+        router.push('/login')
+      })
     }
 
     const locales = [
