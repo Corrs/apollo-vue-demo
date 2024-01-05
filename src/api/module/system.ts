@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation, provideApolloClient } from '@vue/apollo-composable'
+import { useLazyQuery, useMutation, useQuery, provideApolloClient } from '@vue/apollo-composable'
 import { client } from '../apollo'
 import gql from 'graphql-tag'
 
@@ -56,4 +56,193 @@ export const editDept = provideApolloClient(client)(() => useMutation(gql`
             sort
         }
     }`
+))
+
+/**
+ * 登录日志查询
+ */
+export const loginLogsQuery = provideApolloClient(client)(() => useLazyQuery(gql`
+    query loginLogs($cond: LogLoginQueryDTO!) {
+        loginLogs(cond: $cond) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    username
+                    operation
+                    status
+                    userAgent
+                    ip
+                    createTime
+                }
+            }
+        }
+    }`, {
+        cond: {
+            username: '',
+            status: null,
+            startTime: null,
+            endTime: null,
+            current: 1,
+            limit: 10
+        }
+    }
+))
+
+/**
+ * 字典管理分页查询gql
+ */
+const dictTypesGql = gql`
+    query dictTypes($p: Page!, $query: DictTypeQueryDTO) {
+        dictTypes(p: $p, query: $query) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    dictName
+                    dictType
+                    sort
+                    remark
+                    createTime
+                }
+            }
+        }
+    }
+`
+
+/**
+ * 字典管理分页查询
+ */
+export const dictTypesQuery = provideApolloClient(client)(() => useLazyQuery(dictTypesGql, {
+        p: {
+            current: 1,
+            limit: 10
+        },
+        query: {
+            dictName: '',
+            dictType: ''
+        }
+    }
+))
+
+/**
+ * 新增字典
+ */
+export const addDictTypeMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addDictType($dictType: AddDictTypeDTO!){ 
+        addDictType(dictType: $dictType)
+    }`, {
+        refetchQueries: [dictTypesGql, 'dictTypes']
+    }
+))
+
+/**
+ * 编辑字典
+ */
+export const editDictTypeMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editDictType($dictType: EditDictTypeDTO!){ 
+        editDictType(dictType: $dictType)
+    }`, {
+        refetchQueries: [dictTypesGql, 'dictTypes']
+    }
+))
+
+/**
+ * 删除字典
+ */
+export const remDictTypeMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remDictType($id: Long!){ 
+        remDictType(id: $id)
+    }`, {
+        refetchQueries: [dictTypesGql, 'dictTypes']
+    }
+))
+
+const dictDatasGql = gql`
+    query dictDatas($p: Page!, $query: DictDataQueryDTO!) {
+        dictDatas(p: $p, query: $query) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    dictLabel
+                    dictValue
+                    dictTypeId
+                    sort
+                    remark
+                    createTime
+                }
+            }
+        }
+    }
+`
+
+/**
+ * 字典数据分页查询
+ */
+export const dictDatasQuery = provideApolloClient(client)(() => useLazyQuery(dictDatasGql, {
+    p: {
+        current: 1,
+        limit: 10
+    },
+    query: {
+        dictTypeId: 0,
+        dictLabel: '',
+        dictValue: ''
+    }
+}
+))
+
+/**
+ * 新增字典数据
+ */
+export const addDictDataMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addDictData($dictData: AddDictDataDTO!){ 
+        addDictData(dictData: $dictData)
+    }`, {
+        refetchQueries: [dictDatasGql, 'dictDatas']
+    }
+))
+
+/**
+ * 编辑字典数据
+ */
+export const editDictDataMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editDictData($dictData: EditDictDataDTO!){ 
+        editDictData(dictData: $dictData)
+    }`, {
+        refetchQueries: [dictDatasGql, 'dictDatas']
+    }
+))
+
+/**
+ * 删除字典数据
+ */
+export const remDictDataMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remDictData($ids: [Long!]!){ 
+        remDictData(ids: $ids)
+    }`, {
+        refetchQueries: [dictDatasGql, 'dictDatas']
+    }
 ))

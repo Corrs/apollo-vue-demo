@@ -24,8 +24,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       console.log(`无访问【${path}】的权限`)
       layer.msg(`无访问【${path}】的权限`, { icon: 2 })
     } else if (classification === 'INTERNAL_ERROR') {
-      console.log("服务异常")
+      console.log('业务异常')
       layer.msg(error.message, { icon: 2 })
+    } else if (classification === 'ValidationError') {
+      console.log('graphql校验异常', error.message)
+      layer.msg('校验异常', { icon: 2 })
     }
   }
   if (networkError) {
@@ -63,6 +66,7 @@ export const client = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',
+      // fetchPolicy: 'network-only'
     },
   },
 });

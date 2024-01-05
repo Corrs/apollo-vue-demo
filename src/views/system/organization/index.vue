@@ -17,6 +17,12 @@
           @click="changeVisible11('新增', null)"
           >新增</lay-button
         >
+        <lay-button
+          size="sm"
+          type="normal"
+          @click="refetchDepts()"
+          >刷新数据</lay-button
+        >
         <lay-button size="sm" @click="() => {defaultExpandAll=!defaultExpandAll}">{{ defaultExpandAll ? '收起全部':'全部展开'}}</lay-button>
       </template>
       <template v-slot:operator="{ row }">
@@ -27,15 +33,7 @@
           @click="changeVisible11('编辑', row)"
           >编辑</lay-button
         >
-        <lay-popconfirm
-          content="确定要删除此组织吗?"
-          position="right"
-          @confirm="delDept(row.id)"
-        >
-          <lay-button size="xs" border="red" border-style="dashed"
-            >删除</lay-button
-          >
-        </lay-popconfirm>
+        <lay-button size="xs" border="red" border-style="dashed" @click="delDept(row.id)">删除</lay-button>
       </template>
     </lay-table>
     <lay-layer v-model="visible11" :title="title" :area="['500px', '450px']">
@@ -63,7 +61,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { depts, addDept, DEPTS, remDept, editDept } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
-import { successMsg, errorMsg } from '../../../library/msgUtil'
+import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
 
 const defaultExpandAll = ref(false)
 const columns = ref([
@@ -78,8 +76,9 @@ const columns = ref([
     fixed: 'right'
   }
 ])
-const { result: dpetsResult, loading: deptsLoading, load: loadDepts } = depts
+const { result: dpetsResult, loading: deptsLoading, load: loadDepts, refetch: refetchDepts } = depts
 onMounted(() => {
+  console.log('onMounted')
   loadDepts()
 })
 
@@ -210,22 +209,26 @@ function delDept(id: number) {
   if (list.findIndex((e: any) => e.pid === id) > -1) {
     errorMsg('请先删除子机构')
   } else {
-    remDeptMutate({id}, {
-      update: (cache, { data: { remDept } }) => {
-        if (remDept) {
-          let data = cache.readQuery({ query: DEPTS })
-          const deptsCache = data.depts
-          const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === id), 1)
-          data = {
-            ...data,
-            depts: [
-              ...depts
-            ],
+    confirm('确定要删除此组织吗?', () => {
+      return new Promise<boolean>((resolve, reject) => {
+        remDeptMutate({id}, {
+          update: (cache, { data: { remDept } }) => {
+            if (remDept) {
+              let data = cache.readQuery({ query: DEPTS })
+              const deptsCache = data.depts
+              const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === id), 1)
+              data = {
+                ...data,
+                depts: [
+                  ...depts
+                ],
+              }
+              successMsg('删除成功', () => resolve(true))
+              cache.writeQuery({ query: DEPTS, data })
+            }
           }
-          successMsg('删除成功')
-          cache.writeQuery({ query: DEPTS, data })
-        }
-      }
+        })
+      })
     })
   }
 }
@@ -281,4 +284,4 @@ function delDept(id: number) {
   background-color: #e8f1ff;
   color: red;
 }
-</style>
+</style>../../../library/layerUtil

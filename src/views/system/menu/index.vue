@@ -1,57 +1,5 @@
 <template>
   <lay-container fluid="true" class="menu-box">
-    <lay-card>
-      <lay-form style="margin-top: 10px">
-        <lay-row>
-          <lay-col :md="5">
-            <lay-form-item label="菜单名称" label-width="80">
-              <lay-input
-                v-model="searchQuery.name"
-                placeholder="请输入"
-                size="sm"
-                :allow-clear="true"
-                style="width: 98%"
-              ></lay-input>
-            </lay-form-item>
-          </lay-col>
-          <lay-col :md="5">
-            <lay-form-item label="菜单地址" label-width="80">
-              <lay-input
-                v-model="searchQuery.address"
-                placeholder="请输入"
-                size="sm"
-                :allow-clear="true"
-                style="width: 98%"
-              ></lay-input>
-            </lay-form-item>
-          </lay-col>
-          <lay-col :md="5">
-            <lay-form-item label="权限标识" label-width="80">
-              <lay-input
-                v-model="searchQuery.identifying"
-                placeholder="请输入"
-                size="sm"
-                :allow-clear="true"
-                style="width: 98%"
-              ></lay-input>
-            </lay-form-item>
-          </lay-col>
-          <lay-col :md="5">
-            <lay-form-item label-width="20">
-              <lay-button
-                style="margin-left: 20px"
-                type="normal"
-                size="sm"
-                @click="toSearch"
-              >
-                查询
-              </lay-button>
-              <lay-button size="sm" @click="toReset"> 重置 </lay-button>
-            </lay-form-item>
-          </lay-col>
-        </lay-row>
-      </lay-form>
-    </lay-card>
     <!-- table -->
     <div class="table-box">
       <lay-table
@@ -61,22 +9,19 @@
         children-column-name="children"
         :columns="columns6"
         :data-source="dataSource6"
-        :default-toolbar="true"
+        :default-toolbar="false"
         :default-expand-all="defaultExpandAll6"
-        :expand-index="1"
+        :expand-index="0"
       >
         <template #toolbar>
-          <lay-button type="primary" size="sm" @click="getCheckData6"
-            >获取选中数据</lay-button
-          >
           <lay-button
             size="sm"
             @click="changeVisible11('新建', null)"
-            type="normal"
+            type="primary"
           >
             新建
           </lay-button>
-          <lay-button size="sm" @click="expandAll6(true)">展开全部</lay-button>
+          <lay-button size="sm" type="normal" @click="expandAll6(true)">展开全部</lay-button>
           <lay-button size="sm" @click="expandAll6(false)">折叠全部</lay-button>
         </template>
         <template #name="{ row }">
@@ -123,41 +68,37 @@
       </lay-table>
     </div>
 
-    <lay-layer v-model="visible11" :title="title" :area="['700px', '370px']">
+    <lay-layer v-model="visible11" :title="title" :area="['700px', '570px']">
       <div style="padding: 20px">
-        <lay-form :model="model11" ref="layFormRef11" required>
+        <lay-form :model="menuModel" ref="layFormRef11">
           <lay-row>
-            <lay-col md="12">
-              <lay-form-item label="菜单名称" prop="name">
-                <lay-input v-model="model11.name"></lay-input>
+            <lay-col md="24">
+              <lay-form-item label="类型" prop="type" required>
+                <lay-radio-group name="action" v-model="menuModel.type">
+                  <lay-radio :value="1">菜单</lay-radio>
+                  <lay-radio :value="2">按钮</lay-radio>
+                </lay-radio-group>
               </lay-form-item>
-              <lay-form-item label="路由路径" prop="routePath">
-                <lay-input v-model="model11.routePath"></lay-input>
+              <lay-form-item label="名称" prop="name" required>
+                <lay-input v-model="menuModel.name" placeholder="名称"></lay-input>
               </lay-form-item>
-              <lay-form-item label="组件路径" prop="compontPath">
-                <lay-input v-model="model11.compontPath"></lay-input>
+              <lay-form-item label="上级菜单" prop="routePath" required>
+                <lay-input v-model="menuModel.routePath"></lay-input>
               </lay-form-item>
-              <lay-form-item label="图标" prop="icon">
-                <lay-input v-model="model11.icon"></lay-input>
+              <lay-form-item label="路由" prop="routePath" v-show="menuModel.type !== 2">
+                <lay-input v-model="menuModel.routePath" placeholder="路由"></lay-input>
               </lay-form-item>
-            </lay-col>
-            <lay-col md="12">
               <lay-form-item label="排序" prop="sort">
                 <lay-input-number
-                  style="width: 100%"
-                  v-model="model11.sort"
+                  v-model="menuModel.sort"
                   position="right"
                 ></lay-input-number>
               </lay-form-item>
-              <lay-form-item label="是否显示" prop="isShow">
-                <lay-select v-model="model11.isShow" style="width: 100%">
-                  <lay-select-option value="是" label="是"></lay-select-option>
-                  <lay-select-option value="否" label="否"></lay-select-option>
-                </lay-select>
+              <lay-form-item label="授权标识" prop="compontPath">
+                <lay-input v-model="menuModel.compontPath" placeholder="多个用逗号分割，如：sys:menu:save,sys:menu:update"></lay-input>
               </lay-form-item>
-
-              <lay-form-item label="类型" prop="type">
-                <lay-input v-model="model11.type"></lay-input>
+              <lay-form-item label="图标" prop="icon" v-show="menuModel.type !== 2">
+                <lay-icon-picker v-model="menuModel.icon" allow-clear page></lay-icon-picker>
               </lay-form-item>
             </lay-col>
           </lay-row>
@@ -205,12 +146,6 @@ const loading = ref(false)
 const tableRef6 = ref()
 
 const columns6 = [
-  {
-    fixed: 'left',
-    type: 'checkbox',
-    title: '复选'
-  },
-
   {
     title: '菜单名称',
     key: 'name',
@@ -651,11 +586,11 @@ const defaultExpandAll6 = ref(false)
 const expandAll6 = function (flag: any) {
   defaultExpandAll6.value = flag
 }
-const model11 = ref({
+const menuModel = ref({
   name: '',
-  type: '',
+  type: 1,
   sort: 0,
-  icon: '',
+  icon: 'layui-icon-home',
   routePath: '',
   compontPath: '',
   isShow: '是'
@@ -668,13 +603,13 @@ const changeVisible11 = (text: any, row: any) => {
   title.value = text
   if (row != null) {
     let info = JSON.parse(JSON.stringify(row))
-    model11.value = info
+    menuModel.value = info
   } else {
-    model11.value = {
+    menuModel.value = {
       name: '',
-      type: '',
+      type: 1,
       sort: 0,
-      icon: '',
+      icon: 'layui-icon-home',
       routePath: '',
       compontPath: '',
       isShow: '是'
@@ -760,7 +695,7 @@ function toCancel() {
 .table-box {
   margin-top: 10px;
   padding: 10px;
-  height: 700px;
+  height: 100%;
   width: 100%;
   border-radius: 4px;
   box-sizing: border-box;

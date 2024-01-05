@@ -113,7 +113,8 @@ export default defineComponent({
         const graphQLErrors = err.graphQLErrors
         if (graphQLErrors?.length??0) {
           const gError = graphQLErrors[0]
-          if (gError.extensions?.errCode === 'LOGIN_CAPTCHA_EXPIRE') {
+          const errCode = gError.extensions?.errCode
+          if (errCode === 'LOGIN_CAPTCHA_EXPIRE' || errCode === 'LOGIN_CAPTCHA_FAIL') {
             // 验证码过期
             refetchCaptcha()
           }
