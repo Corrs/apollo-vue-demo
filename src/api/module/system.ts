@@ -246,3 +246,59 @@ export const remDictDataMutation = provideApolloClient(client)(() => useMutation
         refetchQueries: [dictDatasGql, 'dictDatas']
     }
 ))
+
+/**
+ * 菜单查询 gql
+ */
+const menusGql = gql`
+    query menus {
+        menus {
+            id
+            name
+            url
+            perms
+            icon
+            type
+            parentId
+            sort
+        }
+    }
+`
+
+/**
+ * 菜单查询
+ */
+export const menusQuery = provideApolloClient(client)(() => useLazyQuery(menusGql))
+
+/**
+ * 新增菜单
+ */
+export const addMenuMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addMenu($menu: AddMenuDTO!) {
+        addMenu(menu: $menu)
+    }`, {
+        refetchQueries: [menusGql, 'menus']
+    }
+))
+
+/**
+ * 编辑菜单
+ */
+export const editMenuMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editMenu($menu: EditMenuDTO!) {
+        editMenu(menu: $menu)
+    }`, {
+        refetchQueries: [menusGql, 'menus']
+    }
+))
+
+/**
+ * 删除菜单
+ */
+export const remMenuMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remMenu($id: Long!) {
+        remMenu(id: $id)
+    }`, {
+      refetchQueries: [menusGql, 'menus']  
+    }
+))

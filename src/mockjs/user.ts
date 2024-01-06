@@ -20,27 +20,6 @@ const menus = [
     ]
   },
   {
-    id: "/form",
-    icon: "layui-icon-table",
-    title: "表单页面",
-    children: [
-      {
-        id: "/form/base",
-        icon: "layui-icon-form",
-        title: "基础表单"
-      }, {
-        id: "/form/intricate",
-        icon: "layui-icon-form",
-        title: "复杂表单"
-      }
-      , {
-        id: "/form/step",
-        icon: "layui-icon-form",
-        title: "分步表单"
-      }
-    ]
-  },
-  {
     id: "/table",
     icon: "layui-icon-align-left",
     title: "列表页面",
@@ -64,6 +43,27 @@ const menus = [
         id: "/table/article",
         icon: "layui-icon-carousel",
         title: "文章列表"
+      }
+    ]
+  },
+  {
+    id: "/form",
+    icon: "layui-icon-table",
+    title: "表单页面",
+    children: [
+      {
+        id: "/form/base",
+        icon: "layui-icon-form",
+        title: "基础表单"
+      }, {
+        id: "/form/intricate",
+        icon: "layui-icon-form",
+        title: "复杂表单"
+      }
+      , {
+        id: "/form/step",
+        icon: "layui-icon-form",
+        title: "分步表单"
       }
     ]
   },

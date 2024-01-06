@@ -16,7 +16,7 @@ export function useMenu() {
   const openKeys = ref<string[]>([]);
   const isAccordion = computed(() => appStore.accordion);
   const isSubfield = computed(() => appStore.subfield);
-  const mainSelectedKey = ref("/workspace");
+  const mainSelectedKey = ref("/");
 
   const menus = computed(() => {
     if(isSubfield.value) {

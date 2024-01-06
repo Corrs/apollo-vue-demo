@@ -25,6 +25,16 @@ export const loginMutation = provideApolloClient(client)(() => useMutation(gql`
                 email
                 mobile
             }
+            permissions {
+                id
+                parentId
+                name
+                url
+                sort
+                type
+                icon
+                perms
+            }
         }
     }`
 ))

@@ -103,8 +103,7 @@ export default defineComponent({
             localStorage.removeItem(CAPTCHA_KEY)
             userStore.userInfo = data.user
             userStore.token = data.authenticationToken
-            await userStore.loadMenus()
-            await userStore.loadPermissions()
+            userStore.loadMenusAndPermissions(data.permissions)
             router.push('/')
           })
         }

@@ -118,14 +118,14 @@
                 ></lay-icon>
               </lay-fullscreen>
             </lay-menu-item> -->
-            <lay-menu-item>
+            <!-- <lay-menu-item>
               <global-message-tab :flag="flag">
                 <lay-icon
                   type="layui-icon-notice"
                   @click="changeDropdown"
                 ></lay-icon>
               </global-message-tab>
-            </lay-menu-item>
+            </lay-menu-item> -->
             <!-- <lay-menu-item>
               <lay-dropdown updateAtScroll placement="bottom">
                 <lay-icon type="layui-icon-website"></lay-icon>
@@ -153,10 +153,6 @@
                     <lay-dropdown-menu-item @click="toUserInfo">
                       <template #default>用户信息</template>
                     </lay-dropdown-menu-item>
-                    <lay-dropdown-menu-item @click="toSystemSet">
-                      <template #default>系统设置</template>
-                    </lay-dropdown-menu-item>
-                    <lay-line></lay-line>
                     <lay-dropdown-menu-item @click="logOut">
                       <template #default>退出登录</template>
                     </lay-dropdown-menu-item>
@@ -245,8 +241,8 @@ export default {
       if (document.body.clientWidth < 768) {
         appStore.collapse = true
       }
-      userInfoStore.loadMenus()
-      userInfoStore.loadPermissions()
+      // userInfoStore.loadMenus()
+      // userInfoStore.loadPermissions()
     })
 
     const changeVisible = () => {
@@ -284,9 +280,6 @@ export default {
     function toUserInfo() {
       router.push('/enrollee/profile')
     }
-    function toSystemSet() {
-      router.push('/system/menu')
-    }
     const flag = ref(false)
     function changeDropdown() {
       flag.value = !flag.value
@@ -313,7 +306,6 @@ export default {
       logOut,
       locales,
       toUserInfo,
-      toSystemSet,
       changeDropdown,
       flag
     }
