@@ -1,5 +1,5 @@
 <template>
-  <lay-container fluid="true" class="dictionary-box">
+  <lay-container fluid="true" class="container-box">
     <lay-card>
       <lay-form style="margin-top: 10px" >
         <lay-row>
@@ -29,13 +29,12 @@
             <lay-form-item label-width="0">
               <lay-button
                 style="margin-left: 20px"
-                type="normal"
                 size="sm"
                 @click="toSearch"
               >
                 查询
               </lay-button>
-              <lay-button size="sm" @click="toReset"> 重置 </lay-button>
+              <lay-button size="sm" type="normal" @click="toReset"> 重置 </lay-button>
               <lay-button
                 type="primary"
                 size="sm"
@@ -78,7 +77,7 @@
           >
           <lay-button
             size="xs"
-            border="green"
+            border="blue"
             border-style="dashed"
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
@@ -193,7 +192,7 @@
             <template v-slot:operator="{ row }">
               <lay-button
                 size="xs"
-                border="green"
+                border="blue"
                 border-style="dashed"
                 @click="changeVisible('编辑', row)"
                 >编辑</lay-button
@@ -649,51 +648,4 @@ function delData(id: number) {
   box-sizing: border-box;
   background-color: #fff;
 }
-.dictionary-box {
-  width: calc(100vw - 220px);
-  height: calc(100vh - 110px);
-  margin-top: 10px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.left-tree {
-  display: inline-block;
-  padding: 20px 15px 0 5px;
-  height: 1200px;
-  border-right: 1px solid #e6e6e6;
-  box-sizing: border-box;
-  position: relative;
-}
-/* todo layui-tree-entry 设置无效 */
-.layui-tree-entry {
-  position: relative;
-  padding: 10px 0;
-  height: 20px;
-  line-height: 20px;
-  white-space: nowrap;
-}
-.isFold {
-  position: absolute;
-  top: 36%;
-  right: -10px;
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
-  border-radius: 13px;
-  background-color: #fff;
-  border: 1px solid #e6e6e6;
-  cursor: pointer;
-}
-
-.search-input {
-  display: inline-block;
-  width: 98%;
-  margin-right: 10px;
-}
-
-.isChecked {
-  display: inline-block;
-  background-color: #e8f1ff;
-  color: red;
-}
-</style>../../../library/layerUtil
+</style>

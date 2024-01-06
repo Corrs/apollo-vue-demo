@@ -1,7 +1,7 @@
 .container-box {
     width: calc(100vw - 220px);
     height: calc(100vh - 110px);
-    margin-top: 10px;
+    margin-top: 10px !important;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -9,7 +9,7 @@
 .table-box {
     margin-top: 10px;
     padding: 10px;
-    height: 700px;
+    height: 100%;
     width: 100%;
     border-radius: 4px;
     box-sizing: border-box;

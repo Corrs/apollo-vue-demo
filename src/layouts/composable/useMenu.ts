@@ -7,7 +7,6 @@ import { useAppStore } from "../../store/app";
 import { useUserStore } from "../../store/user";
 
 export function useMenu() {
-
   const route = useRoute();
   const router = useRouter();
   const userStore = useUserStore();
@@ -16,7 +15,7 @@ export function useMenu() {
   const openKeys = ref<string[]>([]);
   const isAccordion = computed(() => appStore.accordion);
   const isSubfield = computed(() => appStore.subfield);
-  const mainSelectedKey = ref("/");
+  const mainSelectedKey = ref("/home");
 
   const menus = computed(() => {
     if(isSubfield.value) {

@@ -1,5 +1,5 @@
 <template>
-  <lay-container fluid="true" class="menu-box">
+  <lay-container fluid="true" class="container-box">
     <!-- table -->
     <div class="table-box">
       <lay-table
@@ -17,10 +17,10 @@
           <lay-button
             v-permission="['sys:menu:save']"
             size="sm"
-            @click="changeVisible11('新建', null)"
+            @click="changeVisible11('新增', null)"
             type="primary"
           >
-            新建
+            新增
           </lay-button>
           <lay-button size="sm" type="normal" @click="expandAll6(true)">展开全部</lay-button>
           <lay-button size="sm" @click="expandAll6(false)">折叠全部</lay-button>
@@ -35,19 +35,19 @@
             v-if="row.type === 1"
             @click="addChild(row.id)"
             size="xs"
-            border="blue"
-            border-style="dashed"
-          >
-            添加
-          </lay-button>
-          <lay-button
-            v-permission="['sys:menu:update']"
-            @click="changeVisible11('修改', row)"
-            size="xs"
             border="green"
             border-style="dashed"
           >
-            修改
+            新增
+          </lay-button>
+          <lay-button
+            v-permission="['sys:menu:update']"
+            @click="changeVisible11('编辑', row)"
+            size="xs"
+            border="blue"
+            border-style="dashed"
+          >
+            编辑
           </lay-button>
           <lay-button
             v-permission="['sys:menu:delete']"
@@ -290,7 +290,7 @@ const formRules = ref({
     }
   }
 })
-// 新增 or 修改
+// 新增 or 编辑
 const { mutate: addMenu, onDone: addMenuDone, loading: addMenuLoading } = addMenuMutation
 const { mutate: editMenu, onDone: editMenuDone, loading: editMenuLoading } = editMenuMutation
 function toSubmit() {
@@ -344,16 +344,6 @@ function toCancel() {
   border-radius: 4px;
   background-color: #fff;
 }
-.table-box {
-  margin-top: 10px;
-  padding: 10px;
-  height: 100%;
-  width: 100%;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-
 .search-input {
   display: inline-block;
   width: 98%;

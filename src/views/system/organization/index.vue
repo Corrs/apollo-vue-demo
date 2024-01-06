@@ -1,41 +1,43 @@
 <template>
-  <lay-container fluid="true" class="organization-box">
-    <lay-table ref="tableRef6" 
-      children-column-name="children" 
-      :columns="columns"
-      :loading="deptsLoading"
-      :data-source="dataSource"
-      :default-expand-all="defaultExpandAll"
-      :default-toolbar="false" 
-      :expand-index="0"
-      :height="'100%'"
-    >
-      <template v-slot:toolbar>
-        <lay-button
-          size="sm"
-          type="primary"
-          @click="changeVisible11('新增', null)"
-          >新增</lay-button
-        >
-        <lay-button
-          size="sm"
-          type="normal"
-          @click="refetchDepts()"
-          >刷新数据</lay-button
-        >
-        <lay-button size="sm" @click="() => {defaultExpandAll=!defaultExpandAll}">{{ defaultExpandAll ? '收起全部':'全部展开'}}</lay-button>
-      </template>
-      <template v-slot:operator="{ row }">
-        <lay-button
-          size="xs"
-          border="green"
-          border-style="dashed"
-          @click="changeVisible11('编辑', row)"
-          >编辑</lay-button
-        >
-        <lay-button size="xs" border="red" border-style="dashed" @click="delDept(row.id)">删除</lay-button>
-      </template>
-    </lay-table>
+  <lay-container fluid="true" class="container-box">
+    <div class="table-box">
+      <lay-table ref="tableRef6" 
+        children-column-name="children" 
+        :columns="columns"
+        :loading="deptsLoading"
+        :data-source="dataSource"
+        :default-expand-all="defaultExpandAll"
+        :default-toolbar="false" 
+        :expand-index="0"
+        :height="'100%'"
+      >
+        <template v-slot:toolbar>
+          <lay-button
+            size="sm"
+            type="primary"
+            @click="changeVisible11('新增', null)"
+            >新增</lay-button
+          >
+          <lay-button
+            size="sm"
+            type="normal"
+            @click="refetchDepts()"
+            >刷新数据</lay-button
+          >
+          <lay-button size="sm" @click="() => {defaultExpandAll=!defaultExpandAll}">{{ defaultExpandAll ? '收起全部':'全部展开'}}</lay-button>
+        </template>
+        <template v-slot:operator="{ row }">
+          <lay-button
+            size="xs"
+            border="blue"
+            border-style="dashed"
+            @click="changeVisible11('编辑', row)"
+            >编辑</lay-button
+          >
+          <lay-button size="xs" border="red" border-style="dashed" @click="delDept(row.id)">删除</lay-button>
+        </template>
+      </lay-table>
+    </div>
     <lay-layer v-model="visible11" :title="title" :area="['500px', '450px']">
       <div style="padding: 20px">
         <lay-form :model="model11" ref="layFormRef11" required>

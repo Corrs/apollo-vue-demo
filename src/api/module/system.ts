@@ -302,3 +302,73 @@ export const remMenuMutation = provideApolloClient(client)(() => useMutation(gql
       refetchQueries: [menusGql, 'menus']  
     }
 ))
+
+/**
+ * 角色查询 gql
+ */
+const rolesGql = gql`
+    query roles($p: Page!, $roleName: String) {
+        roles(p: $p, roleName: $roleName) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    roleName
+                    remark
+                    createTime
+                }
+            }
+        }        
+    }
+`
+
+/**
+ * 角色查询
+ */
+export const rolesQuery = provideApolloClient(client)(() => useLazyQuery(rolesGql, {
+    p: {
+        current: 1,
+        limit: 10
+    },
+    roleName: '' 
+}))
+
+/**
+ * 新增角色
+ */
+export const addRoleMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addRole($role: AddRoleDTO!) {
+        addRole(role: $role)
+    }`, {
+        refetchQueries: [rolesGql, 'roles']
+    }
+))
+
+/**
+ * 编辑角色
+ */
+export const editRoleMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editRole($role: EditRoleDTO!) {
+        editRole(role: $role)
+    }`, {
+        refetchQueries: [rolesGql, 'roles']
+    }
+))
+
+/**
+ * 删除角色
+ */
+export const remRoleMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remRole($id: Long!) {
+        remRole(id: $id)
+    }`, {
+        refetchQueries: [rolesGql, 'roles']
+    }
+))

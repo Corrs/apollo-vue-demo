@@ -43,13 +43,12 @@
             <lay-form-item label-width="20">
               <lay-button
                 style="margin-left: 20px"
-                type="normal"
                 size="sm"
                 @click="toSearch"
               >
                 查询
               </lay-button>
-              <lay-button size="sm" @click="toReset"> 重置 </lay-button>
+              <lay-button size="sm" type="normal" @click="toReset"> 重置 </lay-button>
             </lay-form-item>
           </lay-col>
         </lay-row>
