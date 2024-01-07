@@ -341,6 +341,20 @@ export const rolesQuery = provideApolloClient(client)(() => useLazyQuery(rolesGq
 }))
 
 /**
+ * 查询所有角色
+ */
+export const roleListQuery = provideApolloClient(client)(() => useLazyQuery(gql`
+    query roleList {
+        roleList {
+            id
+            roleName
+            remark
+            createTime
+        }
+    }`
+))
+
+/**
  * 新增角色
  */
 export const addRoleMutation = provideApolloClient(client)(() => useMutation(gql`
@@ -371,4 +385,33 @@ export const remRoleMutation = provideApolloClient(client)(() => useMutation(gql
     }`, {
         refetchQueries: [rolesGql, 'roles']
     }
+))
+
+/**
+ * 分配权限
+ */
+export const assignPermsMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation assignPerms($perms: AssignPermsDTO!) {
+        assignPerms(perms: $perms)
+    }`
+))
+
+/**
+ * 查询角色分配的权限id集合
+ */
+export const rolePermsQuery = provideApolloClient(client)(() => useLazyQuery(gql`
+    query rolePerms($roleId: Long!) {
+        rolePerms(roleId: $roleId)
+    }`, {
+        roleId: 0
+    }
+))
+
+/**
+ * 新增用户
+ */
+export const addUserMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addUser($user:AddUserDTO!) {
+        addUser(user: $user)
+    }`
 ))

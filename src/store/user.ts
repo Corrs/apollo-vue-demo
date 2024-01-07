@@ -13,10 +13,13 @@ export const useUserStore = defineStore({
       userInfo: {},
       permissions: [],
       menus: [],
+      menusAndPerms: []
     }
   },
   actions: {
     loadMenusAndPermissions(permissions: Array<any>) {
+      // 所有权限
+      this.menusAndPerms = listToTree(permissions, 0, 'id', 'parentId')
       // 按鈕權限
       permissions.filter(e => e.type === BTN)
         .forEach(e => {
@@ -56,24 +59,12 @@ export const useUserStore = defineStore({
         }]
         this.menus = requireMenus.concat(listToTree(menus, 0, 'mid', 'parentId'))
     },
-    async loadMenus(){
-      const { data, code } = await menu();
-      if(code == 200) {
-        this.menus = data;
-      }
-    },
-    async loadPermissions(){
-      const { data, code } = await permission();
-      if(code == 200) {
-        debugger
-        this.permissions = data;
-      }
-    },
     clear() {
       this.token = ''
       this.userInfo = {}
       this.permissions = []
       this.menus = []
+      this.menusAndPerms = []
     },
     logout() {
       this.token = ''
@@ -82,6 +73,6 @@ export const useUserStore = defineStore({
   },
   persist: {
     storage: localStorage,
-    paths: ['token', 'userInfo', 'permissions', 'menus' ],
+    paths: ['token', 'userInfo', 'permissions', 'menus', 'menusAndPerms' ],
   }
 })

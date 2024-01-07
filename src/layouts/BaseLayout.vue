@@ -147,7 +147,7 @@
             </lay-menu-item> -->
             <lay-menu-item>
               <lay-dropdown updateAtScroll placement="bottom">
-                <lay-icon type="layui-icon-username"></lay-icon>
+                <i class="layui-icon layui-icon-username"><span style="margin-left: 5px; color: #666">{{ userInfoStore.userInfo.username }}</span></i>
                 <template #content>
                   <lay-dropdown-menu>
                     <lay-dropdown-menu-item @click="toUserInfo">
@@ -359,10 +359,10 @@ export default {
   padding: 20px;
 }
 
-/*增加鼠标经过图标时改变图标颜色，颜色为当前系统主题色*/
-.layui-header .layui-nav-item .layui-icon:hover {
-  color: var(--global-primary-color) !important;
-}
+// /*增加鼠标经过图标时改变图标颜色，颜色为当前系统主题色*/
+// .layui-header .layui-nav-item .layui-icon:hover {
+//   color: var(--global-primary-color) !important;
+// }
 
 .grey-mode {
   filter: grayscale(1);

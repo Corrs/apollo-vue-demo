@@ -36,6 +36,7 @@
               </lay-button>
               <lay-button size="sm" type="normal" @click="toReset"> 重置 </lay-button>
               <lay-button
+                v-permission="['sys:dict:save']"
                 type="primary"
                 size="sm"
                 @click="changeVisible11('新增', null)"
@@ -76,13 +77,14 @@
             >字典配置</lay-button
           >
           <lay-button
+            v-permission="['sys:dict:update']"
             size="xs"
             border="blue"
             border-style="dashed"
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
           >
-          <lay-button size="xs" border="red" border-style="dashed" @click="delDict(row.id)">删除</lay-button>
+          <lay-button v-permission="['sys:dict:delete']" size="xs" border="red" border-style="dashed" @click="delDict(row.id)">删除</lay-button>
         </template>
       </lay-table>
     </div>
@@ -166,13 +168,14 @@
                     查询
                   </lay-button>
                   <lay-button
+                    v-permission="['sys:dictdata:save']"
                     type="primary"
                     size="sm"
                     @click="changeVisible('新增', null)"
                   >
                     新增
                   </lay-button>
-                  <lay-button size="sm" type="danger" @click="batchDelDatas"> 删除 </lay-button>
+                  <lay-button size="sm" type="danger" v-permission="['sys:dictdata:delete']" @click="batchDelDatas"> 删除 </lay-button>
                 </lay-form-item>
               </lay-col>
             </lay-row>
@@ -191,13 +194,14 @@
           >
             <template v-slot:operator="{ row }">
               <lay-button
+                v-permission="['sys:dictdata:update']"
                 size="xs"
                 border="blue"
                 border-style="dashed"
                 @click="changeVisible('编辑', row)"
                 >编辑</lay-button
               >
-              <lay-button size="xs" border="red" border-style="dashed" @click="delData(row.id)">删除</lay-button>
+              <lay-button size="xs" border="red" border-style="dashed" v-permission="['sys:dictdata:delete']" @click="delData(row.id)">删除</lay-button>
             </template>
           </lay-table>
         </div>

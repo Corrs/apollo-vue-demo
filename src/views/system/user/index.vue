@@ -1,13 +1,13 @@
 <template>
-  <lay-container fluid="true" class="user-box">
+  <lay-container fluid="true" class="container-box">
     <lay-card>
       <lay-form style="margin-top: 10px">
         <lay-row>
           <lay-col :md="5">
-            <lay-form-item label="用户账号" label-width="80">
+            <lay-form-item label-width="0">
               <lay-input
-                v-model="searchQuery.userAccount"
-                placeholder="请输入"
+                v-model="searchQuery.username"
+                placeholder="用户名"
                 size="sm"
                 :allow-clear="true"
                 style="width: 98%"
@@ -15,41 +15,34 @@
             </lay-form-item>
           </lay-col>
           <lay-col :md="5">
-            <lay-form-item label="用户名" label-width="80">
-              <lay-input
-                v-model="searchQuery.userName"
-                placeholder="请输入"
-                size="sm"
-                :allow-clear="true"
-                style="width: 98%"
-              ></lay-input>
-            </lay-form-item>
-          </lay-col>
-          <lay-col :md="5">
-            <lay-form-item label="性别" label-width="80">
+            <lay-form-item label-width="0">
               <lay-select
                 class="search-input"
                 size="sm"
-                v-model="searchQuery.sex"
+                v-model="searchQuery.gender"
                 :allow-clear="true"
-                placeholder="请选择"
+                placeholder="性别"
+                :options="genderOptions"
               >
-                <lay-select-option value="man" label="男"></lay-select-option>
-                <lay-select-option value="woman" label="女"></lay-select-option>
               </lay-select>
+            </lay-form-item>
+          </lay-col>
+          <lay-col :md="5">
+            <lay-form-item label-width="0">
+              <lay-tree-select size="sm" v-model="searchQuery.deptId" placeholder="部门" :data="deptTree" allow-clear style="width: 98%"></lay-tree-select>
             </lay-form-item>
           </lay-col>
           <lay-col :md="5">
             <lay-form-item label-width="20">
               <lay-button
                 style="margin-left: 20px"
-                type="primary"
                 size="sm"
                 @click="toSearch"
               >
                 查询
               </lay-button>
-              <lay-button size="sm" @click="toReset"> 重置 </lay-button>
+              <lay-button size="sm" type="normal" @click="toReset"> 重置 </lay-button>
+              <lay-button size="sm" type="primary" v-permission="['sys:user:save']" @click="changeVisible11('新增')"> 新增 </lay-button>
             </lay-form-item>
           </lay-col>
         </lay-row>
@@ -62,7 +55,7 @@
         :height="'100%'"
         :columns="columns"
         :loading="loading"
-        :default-toolbar="true"
+        :default-toolbar="false"
         :data-source="dataSource"
         v-model:selected-keys="selectedKeys"
         @change="change"
@@ -77,72 +70,53 @@
         <template #avatar="{ row }">
           <lay-avatar :src="row.avatar"></lay-avatar>
         </template>
-        <template v-slot:toolbar>
-          <lay-button size="sm" type="primary" @click="changeVisible11('新增')">
-            <lay-icon class="layui-icon-addition"></lay-icon>
-            新增</lay-button
-          >
-          <lay-button size="sm" @click="toRemove">
-            <lay-icon class="layui-icon-delete"></lay-icon>
-            删除
-          </lay-button>
-          <lay-button size="sm" @click="toImport">
-            <lay-icon class="layui-icon-upload-drag"></lay-icon>
-            导入
-          </lay-button>
-        </template>
         <template v-slot:operator="{ row }">
           <lay-button
+            v-permission="['sys:user:update']"
             size="xs"
-            type="primary"
+            border="blue"
+            border-style="dashed"
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
           >
-          <lay-popconfirm
-            content="确定要删除此用户吗?"
-            @confirm="confirm"
-            @cancel="cancel"
-          >
-            <lay-button size="xs" border="red" border-style="dashed"
-              >删除</lay-button
-            >
-          </lay-popconfirm>
+          <lay-button v-permission="['sys:user:lock']" size="xs" border="orange" border-style="dashed">{{ row.status === 0 ? '启用' : '禁用' }}</lay-button>
+          <lay-button v-permission="['sys:user:delete']" size="xs" border="red" border-style="dashed">删除</lay-button>
+          <lay-button v-permission="['sys:user:delete']" size="xs" border="blue" border-style="dashed">重置密码</lay-button>
         </template>
       </lay-table>
     </div>
 
-    <lay-layer v-model="visible11" :title="title" :area="['500px', '550px']">
+    <lay-layer v-model="visible11" :title="title" :area="['750px', '650px']">
       <div style="padding: 20px">
-        <lay-form :model="model11" ref="layFormRef11" required>
-          <lay-form-item label="姓名" prop="name">
-            <lay-input v-model="model11.name"></lay-input>
+        <lay-form :model="model11" ref="layFormRef11" :rules="formRules" >
+          <lay-form-item label="用户名" prop="username" required>
+            <lay-input v-model="model11.username" placeholder="请输入用户名，只能包含字母和数字"></lay-input>
           </lay-form-item>
-          <lay-form-item label="年龄" prop="age">
-            <lay-input v-model="model11.age"></lay-input>
+          <lay-form-item label="真实姓名" prop="realName" required>
+            <lay-input v-model="model11.realName" placeholder="请输入真实姓名，50字以内"></lay-input>
           </lay-form-item>
-          <lay-form-item label="性别" prop="sex">
-            <lay-select v-model="model11.sex" style="width: 100%">
-              <lay-select-option value="男" label="男"></lay-select-option>
-              <lay-select-option value="女" label="女"></lay-select-option>
-            </lay-select>
+          <lay-form-item label="所属部门" prop="deptId" required>
+            <lay-tree-select v-model="model11.deptId" placeholder="请选择部门" :data="deptTree"></lay-tree-select>
           </lay-form-item>
-          <lay-form-item label="城市" prop="city">
-            <lay-input v-model="model11.city"></lay-input>
+          <lay-form-item label="角色配置" prop="roleId">
+            <lay-select v-model="model11.roleId" :options="roleOptions" placeholder="请选择角色" allow-clear></lay-select>
+          </lay-form-item>
+          <lay-form-item label="性别" prop="gender">
+            <lay-radio-group name="gender" v-model="model11.gender">
+              <template v-for="(ele, index) in genderOptions" :key="index">
+                <lay-radio :value="ele.value">{{ ele.label }}</lay-radio>
+              </template>
+            </lay-radio-group>
           </lay-form-item>
           <lay-form-item label="email" prop="email">
-            <lay-input v-model="model11.email"></lay-input>
+            <lay-input v-model="model11.email" placeholder="请输入邮箱"></lay-input>
           </lay-form-item>
-          <lay-form-item label="描述" prop="remark">
-            <lay-textarea
-              placeholder="请输入描述"
-              v-model="model11.remark"
-            ></lay-textarea>
+          <lay-form-item label="手机号" prop="mobile">
+            <lay-input v-model="model11.mobile" placeholder="请输入手机号"></lay-input>
           </lay-form-item>
         </lay-form>
         <div style="width: 100%; text-align: center">
-          <lay-button size="sm" type="primary" @click="toSubmit"
-            >保存</lay-button
-          >
+          <lay-button size="sm" type="primary" @click="toSubmit" :loading="addUserLoading">保存</lay-button>
           <lay-button size="sm" @click="toCancel">取消</lay-button>
         </div>
       </div>
@@ -172,13 +146,51 @@
   </lay-container>
 </template>
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { layer } from '@layui/layui-vue'
-const searchQuery = ref({
-  userAccount: '',
-  userName: '',
-  sex: ''
+import { ref, reactive, onMounted, computed } from 'vue'
+import { depts, roleListQuery, addUserMutation } from '../../../api/module/system'
+import { listToTree } from '../../../library/treeUtil'
+import { successMsg, errorMsg, confirm, warnMsg } from '../../../library/layerUtil'
+const { result: rolesResult, load: loadRoles } = roleListQuery
+const { result: dpetsResult, load: loadDepts } = depts
+onMounted(() => {
+  loadRoles()
+  loadDepts()
 })
+const deptTree = computed(() => {
+  const list = dpetsResult.value?.depts
+  let children = []
+  if (Array.isArray(list)) {
+    const treeList = list.map(e => {
+      return {
+        ...e,
+        title: e.name,
+        spread: e.pid === 0
+      }
+    })
+    return listToTree(treeList, 0)
+  }
+  return []
+})
+const roleOptions = computed(() => {
+  return (rolesResult.value?.roleList ?? [])
+  .map((e: any) => {
+    return {
+      label: e.roleName,
+      value: e.id
+    }
+  })
+})
+const searchQuery = ref({
+  username: '',
+  deptId: null,
+  gender: null
+})
+const genderOptions =[
+  {value: 0, label: '女'},
+  {value: 1, label: '男'},
+  {value: 2, label: '保密'},
+]
+const statusOptions = [{label: '停用', color: 'red'}, {label: '正常', color: 'blue'}]
 
 const visibleImport = ref(false)
 const file1 = ref<any>([])
@@ -187,9 +199,9 @@ function toImport() {
 }
 function toReset() {
   searchQuery.value = {
-    userAccount: '',
-    userName: '',
-    sex: ''
+    username: '',
+    deptId: null,
+    gender: null
   }
 }
 
@@ -203,19 +215,16 @@ const selectedKeys = ref<string[]>([])
 const page = reactive({ current: 1, limit: 10, total: 100 })
 const columns = ref([
   { title: '选项', width: '60px', type: 'checkbox', fixed: 'left' },
-  { title: '编号', width: '80px', key: 'id', fixed: 'left', sort: 'desc' },
-  { title: '头像', width: '50px', key: 'avatar', customSlot: 'avatar' },
-  { title: '姓名', width: '80px', key: 'name', sort: 'desc' },
+  { title: '用户名', width: '150px', key: 'username' },
+  { title: '真实姓名', width: '150px', key: 'realName' },
+  { title: '性别', width: '80px', key: 'gender' },
+  { title: '邮箱', width: '150px', key: 'email' },
+  { title: '邮箱', width: '150px', key: 'mobile' },
   { title: '状态', width: '80px', key: 'status', customSlot: 'status' },
-  { title: '邮箱', width: '120px', key: 'email' },
-  { title: '性别', width: '80px', key: 'sex' },
-  { title: '年龄', width: '80px', key: 'age' },
-  { title: '城市', width: '120px', key: 'city' },
-  { title: '签名', width: '260px', key: 'remark' },
-  { title: '时间', width: '120px', key: 'joinTime' },
+  { title: '时间', width: '150px', key: 'createTime' },
   {
     title: '操作',
-    width: '120px',
+    width: '180px',
     customSlot: 'operator',
     key: 'operator',
     fixed: 'right'
@@ -403,13 +412,20 @@ const model11 = ref<any>({})
 const layFormRef11 = ref()
 const visible11 = ref(false)
 const title = ref('新增')
+const formRules = ref({
+
+})
 const changeVisible11 = (text: any, row?: any) => {
   title.value = text
   if (row) {
     let info = JSON.parse(JSON.stringify(row))
+    delete info.__typename
+    delete info.createTime
     model11.value = info
   } else {
-    model11.value = {}
+    model11.value = {
+      gender: 0
+    }
   }
   visible11.value = !visible11.value
 }
@@ -468,9 +484,26 @@ function toRemove() {
     ]
   })
 }
+const { mutate: addUser, loading: addUserLoading, onDone: addUserDone } = addUserMutation
 function toSubmit() {
-  layer.msg('保存成功！', { icon: 1, time: 1000 })
-  visible11.value = false
+  layFormRef11.value.validate((isValidate: any, model: any, errors: any) => {
+    if (isValidate) {
+      if (model.id) {
+
+      } else {
+        addUser({user: model})
+        addUserDone(({ data: { addUser } }) => {
+          if (addUser ?? false) {
+            successMsg('保存成功', () => {
+              visible11.value = false
+            })
+          } else {
+            errorMsg('保存失败')
+          }
+        })
+      }
+    }
+  })
 }
 function toCancel() {
   visible11.value = false

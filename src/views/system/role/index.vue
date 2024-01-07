@@ -50,7 +50,7 @@
       >
         <template v-slot:operator="{ row }">
           <lay-button
-            v-permission="['sys:role:permissions']"
+            v-permission="['sys:role:perms']"
             size="xs"
             border="blue"
             border-style="dashed"
@@ -93,21 +93,22 @@
     <lay-layer v-model="visible22" title="分配权限" :area="['500px', '450px']">
       <div style="height: 320px; overflow: auto">
         <lay-tree
+          :checkStrictly="true"
           style="margin-left: 40px"
           :tail-node-icon="false"
-          :data="data2"
+          :data="perms"
           :showCheckbox="showCheckbox2"
           v-model:checkedKeys="checkedKeys2"
         >
           <template #title="{ data }">
             <lay-icon :class="data.icon"></lay-icon>
-            {{ data.title }}
+            {{ data.name }}
           </template>
         </lay-tree>
       </div>
       <lay-line></lay-line>
       <div style="width: 90%; text-align: right">
-        <lay-button size="sm" type="primary" @click="toSubmit">保存</lay-button>
+        <lay-button size="sm" type="primary" @click="toAssignPerms" :loading="assignPermsLoading">保存</lay-button>
         <lay-button size="sm" @click="toCancel">取消</lay-button>
       </div>
     </lay-layer>
@@ -115,8 +116,20 @@
 </template>
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { rolesQuery, addRoleMutation, editRoleMutation, remRoleMutation } from '../../../api/module/system'
-import { successMsg, errorMsg, warnMsg, confirm } from '../../../library/layerUtil'
+import { rolesQuery, addRoleMutation, editRoleMutation, remRoleMutation, assignPermsMutation, rolePermsQuery } from '../../../api/module/system'
+import { successMsg, errorMsg, confirm, warnMsg } from '../../../library/layerUtil'
+import { useUserStore } from '../../../store/user'
+
+const userStore = useUserStore()
+const perms = computed(() => {
+  return userStore.menusAndPerms
+  .map((e: any) => {
+    return {
+      ...e,
+      spread: true
+    }
+  })
+})
 
 const searchQuery = ref({
   roleName: ''
@@ -238,7 +251,6 @@ function toSubmit() {
       }
     }
   })
-  visible11.value = false
 }
 function toCancel() {
   visible11.value = false
@@ -257,104 +269,43 @@ function delRole(id: number) {
 }
 
 const visible22 = ref(false)
-const checkedKeys2 = ref([])
 const showCheckbox2 = ref(true)
-
-const data2 = ref([
-  {
-    icon: 'layui-icon-home',
-
-    title: '工作空间',
-    id: 1,
-    checked: true,
-    spread: true,
-    children: [
-      {
-        title: '工作台',
-        icon: 'layui-icon-util',
-        id: 3
-      },
-      {
-        title: '控制台',
-        icon: 'layui-icon-engine',
-        id: 4,
-        spread: true
-      },
-      {
-        title: '分析页',
-        id: 20,
-        icon: 'layui-icon-chart-screen'
-      },
-      {
-        title: '监控页',
-        id: 21,
-        icon: 'layui-icon-find-fill'
-      }
-    ]
-  },
-  {
-    title: '表单页面',
-    icon: 'layui-icon-table',
-    id: 2,
-    spread: true,
-    children: [
-      {
-        title: '基础表单',
-        icon: 'layui-icon-form',
-        id: 5,
-        spread: true
-      },
-      {
-        title: '复杂表单',
-        icon: 'layui-icon-form',
-        id: 6
-      }
-    ]
-  },
-  {
-    title: '个人中心',
-    icon: 'layui-icon-slider',
-    id: 16,
-    children: [
-      {
-        icon: 'layui-icon-username',
-        title: '我的资料',
-        id: 17,
-        fixed: true
-      },
-      {
-        title: '我的消息',
-        icon: 'layui-icon-email',
-        id: 27
-      }
-    ]
-  },
-  {
-    title: '系统管理',
-    icon: 'layui-icon-set',
-    id: 19,
-    children: [
-      {
-        icon: 'layui-icon-user',
-        title: '用户管理',
-        id: 25,
-        fixed: true
-      },
-      {
-        title: '角色管理',
-        icon: 'layui-icon-group',
-        id: 29
-      },
-      {
-        title: '机构管理',
-        icon: 'layui-icon-transfer',
-        id: 29
-      }
-    ]
+const roleId = ref(0)
+const { onResult: rolePermsResult, load: loadRolePerms, variables: rolePermsVariables } = rolePermsQuery
+const { mutate: assignPerms, loading: assignPermsLoading, onDone: assignPermsDone } = assignPermsMutation
+const checkedKeys2 = ref([])
+function toAssignPerms() {
+  if (roleId.value <= 0) {
+    warnMsg('角色不存在')
+    return
   }
-])
-
+  const perms = checkedKeys2.value
+  assignPerms({ 
+    perms: {
+      roleId: roleId.value,
+      perms
+    } 
+  })
+  assignPermsDone(({data: {assignPerms}}) => {
+    if (assignPerms ?? false) {
+      successMsg('保存成功', () => {
+        visible22.value = false
+      })
+    } else {
+      errorMsg('保存失败')
+    }
+  })
+}
+rolePermsResult(queryResult => {
+  checkedKeys2.value = queryResult.data?.rolePerms ?? []
+})
 function toPrivileges(row: any) {
+  // 根据roleId查询权限
+  rolePermsVariables.value = {
+    roleId: row.id
+  }
+  loadRolePerms()
+  roleId.value = row.id
   visible22.value = true
 }
 </script>

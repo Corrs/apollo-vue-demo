@@ -13,6 +13,7 @@
       >
         <template v-slot:toolbar>
           <lay-button
+            v-permission="['sys:dept:save']"
             size="sm"
             type="primary"
             @click="changeVisible11('新增', null)"
@@ -28,13 +29,14 @@
         </template>
         <template v-slot:operator="{ row }">
           <lay-button
+            v-permission="['sys:dept:update']"
             size="xs"
             border="blue"
             border-style="dashed"
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
           >
-          <lay-button size="xs" border="red" border-style="dashed" @click="delDept(row.id)">删除</lay-button>
+          <lay-button size="xs" border="red" border-style="dashed" @click="delDept(row.id)" v-permission="['sys:dept:delete']">删除</lay-button>
         </template>
       </lay-table>
     </div>
