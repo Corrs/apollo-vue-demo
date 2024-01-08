@@ -97,6 +97,47 @@ export const loginLogsQuery = provideApolloClient(client)(() => useLazyQuery(gql
 ))
 
 /**
+ * 操作日志查询
+ */
+export const operationLogsQuery = provideApolloClient(client)(() => useLazyQuery(gql`
+    query operationLogs($p: Page! $query: OperationLogQueryDTO!) {
+        operationLogs(p: $p, query: $query) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    username
+                    operation
+                    status
+                    userAgent
+                    ip
+                    createTime
+                    requestParams
+                    requestTime
+                }
+            }
+        }
+    }`, {
+        p: {
+            current: 1,
+            limit: 10
+        },
+        query: {
+            startTime: '',
+            endTime: '',
+            status: null
+        }
+    }
+))
+
+/**
  * 字典管理分页查询gql
  */
 const dictTypesGql = gql`

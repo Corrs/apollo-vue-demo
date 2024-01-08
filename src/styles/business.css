@@ -16,10 +16,22 @@
     background-color: #fff;
 }
 
+.table-box-h-700 {
+    height: 700px !important;
+}
+
 .drawer-box {
     width: calc(100% - 20px);
     height: calc(100% - 20px);
     margin-top: 10px;
     box-sizing: border-box;
     overflow: hidden;
+}
+
+.oneRow {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
 }

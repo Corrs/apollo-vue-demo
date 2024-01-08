@@ -96,11 +96,11 @@ const searchQuery = ref({
   status: null,
   rangeTime: [dateStr(now().startOf('d')), nowStr()]
 })
-const loginStatus = ref([
+const loginStatus = [
   { value: 0, label: '失败', color: '#FF5722' },
   { value: 1, label: '成功', color: '#16b777' },
   { value: 2, label: '账号已锁定', color: '#FFB800' }
-])
+]
 
 // 点击重置按钮
 function toReset() {
