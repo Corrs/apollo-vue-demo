@@ -448,11 +448,80 @@ export const rolePermsQuery = provideApolloClient(client)(() => useLazyQuery(gql
     }
 ))
 
+const usersGql = gql`
+    query users($p: Page!, $query: UserQueryDTO!) {
+        users(p: $p, query: $query) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    username
+                    realName
+                    gender
+                    status
+                    deptId
+                    roleId
+                    email
+                    mobile
+                    createTime
+                }
+            }
+        }
+    }
+`
+
+/**
+ * 分页查询用户
+ */
+export const usersQuery = provideApolloClient(client)(() => useLazyQuery(usersGql, {
+    p: {
+        current: 1,
+        limit: 10
+    },
+    query: {}
+}))
+
 /**
  * 新增用户
  */
 export const addUserMutation = provideApolloClient(client)(() => useMutation(gql`
     mutation addUser($user:AddUserDTO!) {
         addUser(user: $user)
-    }`
+    }`, {
+        refetchQueries: [usersGql, 'users']
+    }
+))
+
+/**
+ * 重置密码
+ */
+export const resetPasswordMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation resetPassword($userId: Long!) {
+        resetPassword(userId: $userId)
+    }`, {refetchQueries: [usersGql, 'users']}
+))
+
+/**
+ * 删除用户
+ */
+export const remUserMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remUser($userId: Long!) {
+        remUser(userId: $userId)
+    }`, {refetchQueries: [usersGql, 'users']}
+))
+
+/**
+ * 切换用户状态
+ */
+export const chgUserStatusMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation chgUserStatus($userId: Long!) {
+        chgUserStatus(userId: $userId)
+    }`, {refetchQueries: [usersGql, 'users']}
 ))

@@ -3,7 +3,20 @@
     <lay-card>
       <lay-form style="margin-top: 10px">
         <lay-row>
-          <lay-col :md="5">
+          <lay-col :md="6">
+            <lay-form-item label-width="0">
+              <lay-date-picker
+                :allow-clear="false"
+                size="sm"
+                v-model="searchQuery.rangeTime"
+                range
+                type="datetime"
+                style="width: 98%"
+                :placeholder="['开始时间', '结束时间']"
+              ></lay-date-picker
+            ></lay-form-item>
+          </lay-col>
+          <lay-col :md="3">
             <lay-form-item label-width="0">
               <lay-input
                 v-model="searchQuery.username"
@@ -14,7 +27,7 @@
               ></lay-input>
             </lay-form-item>
           </lay-col>
-          <lay-col :md="5">
+          <lay-col :md="3">
             <lay-form-item label-width="0">
               <lay-select
                 class="search-input"
@@ -27,7 +40,7 @@
               </lay-select>
             </lay-form-item>
           </lay-col>
-          <lay-col :md="5">
+          <lay-col :md="3">
             <lay-form-item label-width="0">
               <lay-tree-select size="sm" v-model="searchQuery.deptId" placeholder="部门" :data="deptTree" allow-clear style="width: 98%"></lay-tree-select>
             </lay-form-item>
@@ -49,7 +62,7 @@
       </lay-form>
     </lay-card>
     <!-- table -->
-    <div class="table-box">
+    <div class="table-box table-box-h-700">
       <lay-table
         :page="page"
         :height="'100%'"
@@ -59,13 +72,20 @@
         :data-source="dataSource"
         v-model:selected-keys="selectedKeys"
         @change="change"
-        @sortChange="sortChange"
       >
+        <template #gender="{ row }">
+          <template v-for="option in genderOptions">
+            <div v-if="row.status === option.value">
+              {{ option.label }}
+            </div>
+          </template>
+        </template>
         <template #status="{ row }">
-          <lay-switch
-            :model-value="row.status"
-            @change="changeStatus($event, row)"
-          ></lay-switch>
+          <template v-for="option in statusOptions">
+            <div v-if="row.status === option.value">
+              <lay-tag :color="option.color" variant="light">{{ option.label }}</lay-tag>
+            </div>
+          </template>
         </template>
         <template #avatar="{ row }">
           <lay-avatar :src="row.avatar"></lay-avatar>
@@ -79,9 +99,9 @@
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
           >
-          <lay-button v-permission="['sys:user:lock']" size="xs" border="orange" border-style="dashed">{{ row.status === 0 ? '启用' : '禁用' }}</lay-button>
-          <lay-button v-permission="['sys:user:delete']" size="xs" border="red" border-style="dashed">删除</lay-button>
-          <lay-button v-permission="['sys:user:delete']" size="xs" border="blue" border-style="dashed">重置密码</lay-button>
+          <lay-button v-permission="['sys:user:lock']" size="xs" border="orange" border-style="dashed" @click="chgStatus(row)">{{ row.status === 0 ? '解锁' : '锁定' }}</lay-button>
+          <lay-button v-permission="['sys:user:delete']" size="xs" border="red" border-style="dashed" @click="rem(row.id)">删除</lay-button>
+          <lay-button v-permission="['sys:user:delete']" size="xs" border="blue" border-style="dashed" @click="resetPwd(row.id)">重置密码</lay-button>
         </template>
       </lay-table>
     </div>
@@ -147,14 +167,18 @@
 </template>
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { depts, roleListQuery, addUserMutation } from '../../../api/module/system'
+import { depts, roleListQuery, addUserMutation, usersQuery, resetPasswordMutation, remUserMutation, chgUserStatusMutation } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
-import { successMsg, errorMsg, confirm, warnMsg } from '../../../library/layerUtil'
+import { now, dateStr, nowStr } from '../../../library/dayUtil'
+import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
 const { result: rolesResult, load: loadRoles } = roleListQuery
 const { result: dpetsResult, load: loadDepts } = depts
+const { result: usersResult, load: loadUsers, loading, variables: qeuryVariables } = usersQuery
 onMounted(() => {
   loadRoles()
   loadDepts()
+  qeuryVariables.value = getQueryParam()
+  loadUsers()
 })
 const deptTree = computed(() => {
   const list = dpetsResult.value?.depts
@@ -180,17 +204,36 @@ const roleOptions = computed(() => {
     }
   })
 })
+function getQueryParam() {
+  const query = searchQuery.value
+  const startTime = query.rangeTime[0]
+  const endTime = query.rangeTime[1]
+  return {
+    p: {
+      current: page.current,
+      limit: page.limit
+    },
+    query: {
+      username: query.username ?? null,
+      gender: query.gender ?? null,
+      deptId: query.deptId ?? null,
+      startTime: startTime ?? null,
+      endTime: endTime ?? null
+    }
+  }
+}
 const searchQuery = ref({
   username: '',
   deptId: null,
-  gender: null
+  gender: null,
+  rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), nowStr()]
 })
 const genderOptions =[
   {value: 0, label: '女'},
   {value: 1, label: '男'},
   {value: 2, label: '保密'},
 ]
-const statusOptions = [{label: '停用', color: 'red'}, {label: '正常', color: 'blue'}]
+const statusOptions = [{value: 0, label: '锁定', color: '#FF5722'}, {value: 1, label: '正常', color: '#16b777'}]
 
 const visibleImport = ref(false)
 const file1 = ref<any>([])
@@ -201,7 +244,8 @@ function toReset() {
   searchQuery.value = {
     username: '',
     deptId: null,
-    gender: null
+    gender: null,
+    rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), nowStr()]
   }
 }
 
@@ -210,16 +254,15 @@ function toSearch() {
   change(page)
 }
 
-const loading = ref(false)
 const selectedKeys = ref<string[]>([])
-const page = reactive({ current: 1, limit: 10, total: 100 })
+  const page = reactive({ current: 1, limit: 10, total: 0, hideOnSinglePage: false, layout: ['count', 'prev', 'page', 'next', 'limits', 'skip'] })
 const columns = ref([
   { title: '选项', width: '60px', type: 'checkbox', fixed: 'left' },
   { title: '用户名', width: '150px', key: 'username' },
   { title: '真实姓名', width: '150px', key: 'realName' },
-  { title: '性别', width: '80px', key: 'gender' },
+  { title: '性别', width: '80px', key: 'gender', customSlot: 'gender' },
   { title: '邮箱', width: '150px', key: 'email' },
-  { title: '邮箱', width: '150px', key: 'mobile' },
+  { title: '手机号', width: '150px', key: 'mobile' },
   { title: '状态', width: '80px', key: 'status', customSlot: 'status' },
   { title: '时间', width: '150px', key: 'createTime' },
   {
@@ -231,183 +274,71 @@ const columns = ref([
   }
 ])
 const change = (page: any) => {
-  loading.value = true
-  setTimeout(() => {
-    dataSource.value = loadDataSource(page.current, page.limit)
-    loading.value = false
-  }, 1000)
+  qeuryVariables.value = getQueryParam()
 }
-const sortChange = (key: any, sort: number) => {
-  layer.msg(`字段${key} - 排序${sort}, 你可以利用 sort-change 实现服务端排序`)
-}
-const dataSource = ref([
-  {
-    id: '1',
-    name: '张三1',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '18',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '2',
-    name: '张三2',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '3',
-    name: '张三3',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '4',
-    name: '张三4',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '5',
-    name: '张三5',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '6',
-    name: '张三6',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '7',
-    name: '张三7',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '18',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '8',
-    name: '张三8',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '9',
-    name: '张三9',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
-  },
-  {
-    id: '10',
-    name: '张三10',
-    avatar:
-      'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-    email: 'test@qq.com',
-    sex: '男',
-    city: '浙江杭州',
-    age: '20',
-    remark: '花开堪折直须折,莫待无花空折枝.',
-    joinTime: '2022-02-09',
-    status: true
+const dataSource = computed(() => {
+  const data = usersResult.value?.users
+  if (data) {
+    const edges = data.edges
+    page.total = data.total ?? 0
+    return Array.isArray(edges) ? edges.map(e => e.node) : []
   }
-])
+  return []
+})
 
-const changeStatus = (isChecked: boolean, row: any) => {
-  dataSource.value.forEach((item) => {
-    if (item.id === row.id) {
-      layer.msg('Success', { icon: 1 }, () => {
-        item.status = isChecked
+// 修改用户状态
+const { mutate: chgUserStatus, onDone: chgUserStatusDone } = chgUserStatusMutation
+const chgStatus = (row: any) => {
+  const userId = row.id
+  const tip = row.status === 0 ? '解锁' : '锁定'
+  confirm(`确定${tip}用户吗？`, () => {
+    return new Promise<boolean>((resolve, reject) => {
+      chgUserStatus({userId})
+      chgUserStatusDone(({data: {chgUserStatus}}) => {
+        if (chgUserStatus) {
+          successMsg(`${tip}成功`, () => resolve(true))
+        } else {
+          errorMsg(`${tip}失败`, () => resolve(false))
+        }
       })
-    }
+    })
   })
 }
 
-const remove = () => {
-  layer.msg(JSON.stringify(selectedKeys.value), { area: '50%' })
+// 重置密码
+const { mutate: resetPassword, onDone: resetPwdDone } = resetPasswordMutation
+const resetPwd = (userId: number) => {
+  confirm('确定重置密码吗？', () => {
+    return new Promise<boolean>((resolve, reject) => {
+      resetPassword({userId})
+      resetPwdDone(({data: {resetPassword}}) => {
+        if (resetPassword) {
+          successMsg('密码重置成功', () => resolve(true))
+        } else {
+          errorMsg('密码重置失败', () => resolve(false))
+        }
+      })
+    })
+  })
 }
 
-const loadDataSource = (page: number, pageSize: number) => {
-  var response = []
-  var startIndex = (page - 1) * pageSize + 1
-  var endIndex = page * pageSize
-  for (var i = startIndex; i <= endIndex; i++) {
-    response.push({
-      id: `${i}`,
-      age: '18',
-      sex: '男',
-      avatar:
-        'https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7',
-      name: `张三${i}`,
-      email: 'test@qq.com',
-      remark: '花开堪折直须折,莫待无花空折枝.',
-      joinTime: '2022-02-09',
-      city: '浙江杭州',
-      status: true
+// 删除用户
+const { mutate: remUser, onDone: remUserDone } = remUserMutation
+const rem = (userId: number) => {
+  confirm('确定删除用户数据吗？', () => {
+    return new Promise<boolean>((resolve, reject) => {
+      remUser({userId})
+      remUserDone(({data: {remUser}}) => {
+        if (remUser) {
+          successMsg('删除成功', () => resolve(true))
+        } else {
+          errorMsg('删除失败', () => resolve(false))
+        }
+      })
     })
-  }
-  return response
+  })
 }
+
 const model11 = ref<any>({})
 const layFormRef11 = ref()
 const visible11 = ref(false)
@@ -508,9 +439,9 @@ function toSubmit() {
 function toCancel() {
   visible11.value = false
 }
-function confirm() {
-  layer.msg('您已成功删除')
-}
+// function confirm() {
+//   layer.msg('您已成功删除')
+// }
 function cancel() {
   layer.msg('您已取消操作')
 }
@@ -525,40 +456,10 @@ const beforeUpload10 = (file: File) => {
 </script>
 
 <style scoped>
-.user-box {
-  height: calc(100vh - 110px);
-  margin-top: 10px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-.top-search {
-  margin-top: 10px;
-  padding: 10px;
-  height: 40px;
-  border-radius: 4px;
-  background-color: #fff;
-}
-
-.table-box {
-  margin-top: 10px;
-  padding: 10px;
-  height: 700px;
-  width: 100%;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-
 .search-input {
   display: inline-block;
   width: 98%;
   margin-right: 10px;
 }
 
-.isChecked {
-  display: inline-block;
-  background-color: #e8f1ff;
-  color: red;
-}
 </style>

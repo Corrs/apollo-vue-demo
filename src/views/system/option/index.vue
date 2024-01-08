@@ -183,6 +183,7 @@ const dataSource = computed(() => {
     page.total = data.total ?? 0
     return Array.isArray(edges) ? edges.map(e => e.node) : []
   }
+  return []
 })
 </script>
 
