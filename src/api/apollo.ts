@@ -47,7 +47,7 @@ const authMiddleware = new ApolloLink((operation, forward) => {
     headers: {
       ...headers,
       timestamp: new Date().getTime(),
-      captchaKey: captchaKey ?? "",
+      captchaKey: captchaKey ? captchaKey : "",
       Authentication: user ? JSON.parse(user)?.token : ""
     }
   }))

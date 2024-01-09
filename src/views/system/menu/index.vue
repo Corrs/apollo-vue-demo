@@ -299,7 +299,7 @@ function toSubmit() {
       if (model.id && model.id > 0) {
         editMenu({ menu: model })
         editMenuDone(({ data: { editMenu } }) => {
-          if (editMenu ?? false) {
+          if (editMenu) {
             successMsg('保存成功', () => {
               parentId.value = 0
               visible11.value = false
@@ -311,7 +311,7 @@ function toSubmit() {
       } else {
         addMenu({ menu: model })
         addMenuDone(({ data: {addMenu} }) => {
-          if (addMenu ?? false) {
+          if (addMenu) {
             successMsg('保存成功', () => {
               parentId.value = 0
               visible11.value = false

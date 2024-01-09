@@ -136,7 +136,7 @@
           </lay-form-item>
         </lay-form>
         <div style="width: 100%; text-align: center">
-          <lay-button size="sm" type="primary" @click="toSubmit" :loading="addUserLoading">保存</lay-button>
+          <lay-button size="sm" type="primary" @click="toSubmit" :loading="addUserLoading || editUserLoading">保存</lay-button>
           <lay-button size="sm" @click="toCancel">取消</lay-button>
         </div>
       </div>
@@ -167,7 +167,7 @@
 </template>
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { depts, roleListQuery, addUserMutation, usersQuery, resetPasswordMutation, remUserMutation, chgUserStatusMutation } from '../../../api/module/system'
+import { depts, roleListQuery, addUserMutation, usersQuery, resetPasswordMutation, remUserMutation, chgUserStatusMutation, editUserMutation } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
 import { now, dateStr, nowStr } from '../../../library/dayUtil'
 import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
@@ -182,7 +182,6 @@ onMounted(() => {
 })
 const deptTree = computed(() => {
   const list = dpetsResult.value?.depts
-  let children = []
   if (Array.isArray(list)) {
     const treeList = list.map(e => {
       return {
@@ -214,11 +213,11 @@ function getQueryParam() {
       limit: page.limit
     },
     query: {
-      username: query.username ?? null,
-      gender: query.gender ?? null,
-      deptId: query.deptId ?? null,
-      startTime: startTime ?? null,
-      endTime: endTime ?? null
+      username: query.username,
+      gender: query.gender === '' ? null : query.gender,
+      deptId: query.deptId === '' ? null : query.deptId,
+      startTime: startTime === '' ? null : startTime,
+      endTime: endTime === '' ? null : endTime
     }
   }
 }
@@ -352,6 +351,7 @@ const changeVisible11 = (text: any, row?: any) => {
     let info = JSON.parse(JSON.stringify(row))
     delete info.__typename
     delete info.createTime
+    delete info.status
     model11.value = info
   } else {
     model11.value = {
@@ -359,36 +359,6 @@ const changeVisible11 = (text: any, row?: any) => {
     }
   }
   visible11.value = !visible11.value
-}
-const submit11 = function () {
-  layFormRef11.value.validate((isValidate: any, model: any, errors: any) => {
-    layer.open({
-      type: 1,
-      title: '表单提交结果',
-      content: `<div style="padding: 10px"><p>是否通过 : ${isValidate}</p> <p>表单数据 : ${JSON.stringify(
-        model
-      )} </p> <p>错误信息 : ${JSON.stringify(errors)}</p></div>`,
-      shade: false,
-      isHtmlFragment: true,
-      btn: [
-        {
-          text: '确认',
-          callback(index: number) {
-            layer.close(index)
-          }
-        }
-      ],
-      area: '500px'
-    })
-  })
-}
-// 清除校验
-const clearValidate11 = function () {
-  layFormRef11.value.clearValidate()
-}
-// 重置表单
-const reset11 = function () {
-  layFormRef11.value.reset()
 }
 function toRemove() {
   if (selectedKeys.value.length == 0) {
@@ -416,15 +386,29 @@ function toRemove() {
   })
 }
 const { mutate: addUser, loading: addUserLoading, onDone: addUserDone } = addUserMutation
+const { mutate: editUser, loading: editUserLoading, onDone: editUserDone } = editUserMutation
 function toSubmit() {
   layFormRef11.value.validate((isValidate: any, model: any, errors: any) => {
     if (isValidate) {
+      const user = {
+        ...model,
+          roleId: model.roleId === '' ? null : model.roleId
+      }
       if (model.id) {
-
+        editUser({user})
+        editUserDone(({ data: { editUser } }) => {
+          if (editUser) {
+            successMsg('保存成功', () => {
+              visible11.value = false
+            })
+          } else {
+            errorMsg('保存失败')
+          }
+        })
       } else {
-        addUser({user: model})
+        addUser({user})
         addUserDone(({ data: { addUser } }) => {
-          if (addUser ?? false) {
+          if (addUser) {
             successMsg('保存成功', () => {
               visible11.value = false
             })
@@ -439,12 +423,7 @@ function toSubmit() {
 function toCancel() {
   visible11.value = false
 }
-// function confirm() {
-//   layer.msg('您已成功删除')
-// }
-function cancel() {
-  layer.msg('您已取消操作')
-}
+
 const beforeUpload10 = (file: File) => {
   var isOver = false
   if (file.size > 1000) {

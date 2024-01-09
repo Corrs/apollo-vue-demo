@@ -379,7 +379,7 @@ function toSubmitType() {
           dictType
         })
         editDictTypeDone(({data: {editDictType}}) => {
-          if (editDictType ?? false) {
+          if (editDictType) {
             successMsg('保存成功', () => {
               visible11.value = false
             })
@@ -395,7 +395,7 @@ function toSubmitType() {
           }
         })
         addDictTypeDone(({data: {addDictType}}) => {
-          if (addDictType ?? false) {
+          if (addDictType) {
             successMsg('保存成功', () => {
               visible11.value = false
             })
@@ -586,7 +586,7 @@ function toSubmitData() {
           dictData
         })
         editDictDataDone(({data: {editDictData}}) => {
-          if (editDictData ?? false) {
+          if (editDictData) {
             successMsg('保存成功', () => {
               visible.value = false
             })
@@ -602,7 +602,7 @@ function toSubmitData() {
           }
         })
         addDictDataDone(({data: {addDictData}}) => {
-          if (addDictData ?? false) {
+          if (addDictData) {
             successMsg('保存成功', () => {
               visible.value = false
             })

@@ -228,7 +228,7 @@ function toSubmit() {
       if (model.id && model.id > 0) {
         editRole({ role: model })
         editRoleDone(({data: {editRole}}) => {
-          if (editRole ?? false) {
+          if (editRole) {
             successMsg('保存成功', () => {
               visible11.value = false
             })
@@ -240,7 +240,7 @@ function toSubmit() {
         // 新增字典
         addRole({ role: model })
         addRoleDone(({data: {addRole}}) => {
-          if (addRole ?? false) {
+          if (addRole) {
             successMsg('保存成功', () => {
               visible11.value = false
             })
@@ -287,7 +287,7 @@ function toAssignPerms() {
     } 
   })
   assignPermsDone(({data: {assignPerms}}) => {
-    if (assignPerms ?? false) {
+    if (assignPerms) {
       successMsg('保存成功', () => {
         visible22.value = false
       })

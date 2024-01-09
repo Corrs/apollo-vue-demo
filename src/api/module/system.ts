@@ -525,3 +525,14 @@ export const chgUserStatusMutation = provideApolloClient(client)(() => useMutati
         chgUserStatus(userId: $userId)
     }`, {refetchQueries: [usersGql, 'users']}
 ))
+
+/**
+ * 编辑用户
+ */
+export const editUserMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editUser($user: EditUserDTO!) {
+        editUser(user: $user)
+    }`,{
+        refetchQueries: [usersGql, 'users']
+    }
+))
