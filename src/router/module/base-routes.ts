@@ -206,6 +206,11 @@ export default [
         meta: { title: '我的资料', requireAuth: true },
       },
       {
+        path: '/enrollee/password',
+        component: () => import('../../views/enrollee/password/index.vue'),
+        meta: { title: '修改密码', requireAuth: true },
+      },
+      {
         path: '/enrollee/message',
         component: () => import('../../views/enrollee/message/index.vue'),
         meta: { title: '我的消息', requireAuth: true },

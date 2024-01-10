@@ -55,19 +55,20 @@ export const treeToList = function (arr: any[]){
 }
 
 export const listToTree = function(arr:any[], root:any, col:string = 'id', refCol:string = 'pid', sortCol:string = 'sort') {
-    arr.forEach(e => {
-      arr.forEach(y => { 
-        if (y[refCol] == e[col]) { 
-          if (!e.children) {
-            e.children = []
-          }
-          e.children.push(y)
-          if (e.children.length > 1) {
-            e.children.sort((e1, e2) => e1[sortCol]-e2[sortCol])
-          }
+  let res: any[] = JSON.parse(JSON.stringify(arr))
+  res.forEach(e => {
+    res.forEach(y => { 
+      if (y[refCol] == e[col]) { 
+        if (!e.children) {
+          e.children = []
         }
-      })
+        e.children.push(y)
+        if (e.children.length > 1) {
+          e.children.sort((e1: any, e2: any) => e1[sortCol]-e2[sortCol])
+        }
+      }
     })
-    arr = arr.filter(ele => ele[refCol] === root).sort((e1, e2) => e1[sortCol]-e2[sortCol])
-    return arr
+  })
+  res = res.filter(ele => ele[refCol] === root).sort((e1, e2) => e1[sortCol]-e2[sortCol])
+  return res
 }

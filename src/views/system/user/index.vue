@@ -81,6 +81,7 @@
           </template>
         </template>
         <template #status="{ row }">
+          <div v-if="row.isDeleted" style="margin-right: 5px;"><lay-tag color="red" variant="light">已删除</lay-tag></div>
           <template v-for="option in statusOptions">
             <div v-if="row.status === option.value">
               <lay-tag :color="option.color" variant="light">{{ option.label }}</lay-tag>
@@ -99,7 +100,7 @@
             @click="changeVisible11('编辑', row)"
             >编辑</lay-button
           >
-          <lay-button v-permission="['sys:user:lock']" size="xs" border="orange" border-style="dashed" @click="chgStatus(row)">{{ row.status === 0 ? '解锁' : '锁定' }}</lay-button>
+          <lay-button v-permission="['sys:user:lock']" size="xs" :border="(row.status === 0 ? 'green' : 'orange')" border-style="dashed" @click="chgStatus(row)">{{ row.status === 0 ? '解锁' : '锁定' }}</lay-button>
           <lay-button v-permission="['sys:user:delete']" size="xs" border="red" border-style="dashed" @click="rem(row.id)">删除</lay-button>
           <lay-button v-permission="['sys:user:delete']" size="xs" border="blue" border-style="dashed" @click="resetPwd(row.id)">重置密码</lay-button>
         </template>
@@ -109,8 +110,8 @@
     <lay-layer v-model="visible11" :title="title" :area="['750px', '650px']">
       <div style="padding: 20px">
         <lay-form :model="model11" ref="layFormRef11" :rules="formRules" >
-          <lay-form-item label="用户名" prop="username" required>
-            <lay-input v-model="model11.username" placeholder="请输入用户名，只能包含字母和数字"></lay-input>
+          <lay-form-item label="用户名" prop="username" :required="!model11.id">
+            <lay-input v-model="model11.username" placeholder="请输入用户名，只能包含字母和数字" :disabled="!!model11.id"></lay-input>
           </lay-form-item>
           <lay-form-item label="真实姓名" prop="realName" required>
             <lay-input v-model="model11.realName" placeholder="请输入真实姓名，50字以内"></lay-input>
@@ -169,14 +170,14 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { depts, roleListQuery, addUserMutation, usersQuery, resetPasswordMutation, remUserMutation, chgUserStatusMutation, editUserMutation } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
-import { now, dateStr, nowStr } from '../../../library/dayUtil'
+import { now, dateStr } from '../../../library/dayUtil'
 import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
-const { result: rolesResult, load: loadRoles } = roleListQuery
-const { result: dpetsResult, load: loadDepts } = depts
+const { result: rolesResult, load: loadRoles, refetch: refetchRoles } = roleListQuery
+const { result: dpetsResult, load: loadDepts, refetch: refetchDepts } = depts
 const { result: usersResult, load: loadUsers, loading, variables: qeuryVariables } = usersQuery
 onMounted(() => {
-  loadRoles()
-  loadDepts()
+  loadRoles() || refetchRoles()
+  loadDepts() || refetchDepts()
   qeuryVariables.value = getQueryParam()
   loadUsers()
 })
@@ -225,7 +226,7 @@ const searchQuery = ref({
   username: '',
   deptId: null,
   gender: null,
-  rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), nowStr()]
+  rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), dateStr(now().endOf('d'))]
 })
 const genderOptions =[
   {value: 0, label: '女'},
@@ -244,7 +245,7 @@ function toReset() {
     username: '',
     deptId: null,
     gender: null,
-    rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), nowStr()]
+    rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), dateStr(now().endOf('d'))]
   }
 }
 
@@ -254,7 +255,7 @@ function toSearch() {
 }
 
 const selectedKeys = ref<string[]>([])
-  const page = reactive({ current: 1, limit: 10, total: 0, hideOnSinglePage: false, layout: ['count', 'prev', 'page', 'next', 'limits', 'skip'] })
+const page = reactive({ current: 1, limit: 10, total: 0, hideOnSinglePage: false, layout: ['count', 'prev', 'page', 'next', 'limits', 'skip'] })
 const columns = ref([
   { title: '选项', width: '60px', type: 'checkbox', fixed: 'left' },
   { title: '用户名', width: '150px', key: 'username' },
@@ -262,7 +263,7 @@ const columns = ref([
   { title: '性别', width: '80px', key: 'gender', customSlot: 'gender' },
   { title: '邮箱', width: '150px', key: 'email' },
   { title: '手机号', width: '150px', key: 'mobile' },
-  { title: '状态', width: '80px', key: 'status', customSlot: 'status' },
+  { title: '状态', width: '120px', key: 'status', customSlot: 'status', align: 'center' },
   { title: '时间', width: '150px', key: 'createTime' },
   {
     title: '操作',
@@ -343,7 +344,27 @@ const layFormRef11 = ref()
 const visible11 = ref(false)
 const title = ref('新增')
 const formRules = ref({
-
+  username: {
+    type: 'string',
+    pattern: '^[a-zA-Z][0-9a-zA-Z]{7,49}$',
+    message: '用户名必须以字母开头，只能包含字母和数字，长度8-50'
+  },
+  realName: {
+    type: 'string',
+    min: 2,
+    max: 50
+  },
+  mobile: {
+    type: 'string',
+    pattern: '^[0,1][0-9]{10,14}$',
+    message: '请输入正确的手机号'
+  },
+  email: {
+    type: 'string',
+    max: 50,
+    pattern: '^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$',
+    message: '请输入正确的邮箱'
+  }
 })
 const changeVisible11 = (text: any, row?: any) => {
   title.value = text
@@ -352,6 +373,7 @@ const changeVisible11 = (text: any, row?: any) => {
     delete info.__typename
     delete info.createTime
     delete info.status
+    delete info.isDeleted
     model11.value = info
   } else {
     model11.value = {
@@ -360,31 +382,6 @@ const changeVisible11 = (text: any, row?: any) => {
   }
   visible11.value = !visible11.value
 }
-function toRemove() {
-  if (selectedKeys.value.length == 0) {
-    layer.msg('您未选择数据，请先选择要删除的数据', { icon: 3, time: 2000 })
-    return
-  }
-  layer.confirm('您将删除所有选中的数据？', {
-    title: '提示',
-    btn: [
-      {
-        text: '确定',
-        callback: (id: any) => {
-          layer.msg('您已成功删除')
-          layer.close(id)
-        }
-      },
-      {
-        text: '取消',
-        callback: (id: any) => {
-          layer.msg('您已取消操作')
-          layer.close(id)
-        }
-      }
-    ]
-  })
-}
 const { mutate: addUser, loading: addUserLoading, onDone: addUserDone } = addUserMutation
 const { mutate: editUser, loading: editUserLoading, onDone: editUserDone } = editUserMutation
 function toSubmit() {
@@ -392,9 +389,10 @@ function toSubmit() {
     if (isValidate) {
       const user = {
         ...model,
-          roleId: model.roleId === '' ? null : model.roleId
+        roleId: model.roleId === '' ? null : model.roleId
       }
       if (model.id) {
+        delete user.username
         editUser({user})
         editUserDone(({ data: { editUser } }) => {
           if (editUser) {

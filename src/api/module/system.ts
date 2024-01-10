@@ -466,6 +466,7 @@ const usersGql = gql`
                     realName
                     gender
                     status
+                    isDeleted
                     deptId
                     roleId
                     email
@@ -536,3 +537,12 @@ export const editUserMutation = provideApolloClient(client)(() => useMutation(gq
         refetchQueries: [usersGql, 'users']
     }
 ))
+
+/**
+ * 修改密码
+ */
+export const modifyPasswordMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation modifyPassword($pwd: ModifyPasswordDTO!) {
+        modifyPassword(pwd: $pwd)
+    }
+`))

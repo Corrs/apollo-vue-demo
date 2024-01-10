@@ -198,7 +198,7 @@ const menuTree = computed(() => {
 })
 // 删除
 const { mutate: remMenu, onDone: remMenuDone } = remMenuMutation
-function toRemove(id: integer) {
+function toRemove(id: number) {
   confirm('确定删除菜单数据吗？', () => {
     return new Promise<boolean>((resolve, reject) => {
       remMenu({ id })

@@ -81,7 +81,7 @@ export default defineComponent({
     const { result: captchaResult, refetch: refetchCaptcha, load: loadCaptcha } = loginCaptcha
     onMounted(() => {
       userStore.clear()
-      loadCaptcha()
+      loadCaptcha() || refetchCaptcha()
     })
     watch(captchaResult, value => {
       // 缓存captchaKey，在请求头中携带，登录成功后删除

@@ -150,8 +150,11 @@
                 <i class="layui-icon layui-icon-username"><span style="margin-left: 5px; color: #666">{{ userInfoStore.userInfo.username }}</span></i>
                 <template #content>
                   <lay-dropdown-menu>
-                    <lay-dropdown-menu-item @click="toUserInfo">
+                    <!-- <lay-dropdown-menu-item @click="toUserInfo">
                       <template #default>用户信息</template>
+                    </lay-dropdown-menu-item> -->
+                    <lay-dropdown-menu-item @click="toModifyPassword">
+                      <template #default>修改密码</template>
                     </lay-dropdown-menu-item>
                     <lay-dropdown-menu-item @click="logOut">
                       <template #default>退出登录</template>
@@ -280,6 +283,9 @@ export default {
     function toUserInfo() {
       router.push('/enrollee/profile')
     }
+    function toModifyPassword() {
+      router.push('/enrollee/password')
+    }
     const flag = ref(false)
     function changeDropdown() {
       flag.value = !flag.value
@@ -306,6 +312,7 @@ export default {
       logOut,
       locales,
       toUserInfo,
+      toModifyPassword,
       changeDropdown,
       flag
     }

@@ -1,6 +1,6 @@
 import { ApolloClient, createHttpLink, InMemoryCache, ApolloLink, concat } from '@apollo/client/core'
 import { onError } from '@apollo/client/link/error'
-import { layer } from '@layui/layer-vue'
+import { errorMsg } from '../library/layerUtil'
 import { useUserStore } from '../store/user'
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs"
 
@@ -12,7 +12,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (classification === 'UNAUTHORIZED') {
       // todo 提示登录过期或未登录，调用退出登录方法
       console.log("登录过期或未登录")
-      layer.msg("登录过期或未登录", { icon: 2 }, () => {
+      errorMsg("登录过期或未登录", () => {
         const userInfoStore = useUserStore()
         userInfoStore.logout()
         // 这里没有办法用vue-router
@@ -22,18 +22,19 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       const path = error.path?.values()?.next()?.value
       // todo 提示无访问权限
       console.log(`无访问【${path}】的权限`)
-      layer.msg(`无访问【${path}】的权限`, { icon: 2 })
+      errorMsg(`无访问权限`)
     } else if (classification === 'INTERNAL_ERROR') {
       console.log('业务异常')
-      layer.msg(error.message, { icon: 2 })
+      errorMsg(error.message)
     } else if (classification === 'ValidationError') {
       console.log('graphql校验异常', error.message)
-      layer.msg('校验异常', { icon: 2 })
+      errorMsg('校验异常')
     }
   }
   if (networkError) {
     // todo 提示网络异常，请稍后
     console.log(`[Network error]: ${networkError}`)
+    errorMsg('网络异常，请稍后再试')
   }
 })
 
