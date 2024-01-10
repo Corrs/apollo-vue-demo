@@ -254,11 +254,10 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { successMsg, errorMsg, warnMsg, confirm } from '../../../library/layerUtil'
 import { addDictDataMutation, dictDatasQuery, editDictDataMutation, remDictDataMutation, addDictTypeMutation, dictTypesQuery, editDictTypeMutation, remDictTypeMutation } from '../../../api/module/system'
 
-const { load: loadDictTypes, result: dictTypes, loading: dictTypesLoading, variables: qeuryVariables } = dictTypesQuery
+const { load: loadDictTypes, result: dictTypes, loading: dictTypesLoading, refetch: refetchDictTypes } = dictTypesQuery
 onMounted(() => {
   // 初始加载字典列表数据
-  qeuryVariables.value = getDictTypeQuery()
-  loadDictTypes()
+  loadDictTypes(null, getDictTypeQuery())
 })
 // 获取字典列表查询参数
 function getDictTypeQuery() {
@@ -289,7 +288,7 @@ function toSearch() {
 }
 // 字典表格分页切换
 const change = (page: any) => {
-  qeuryVariables.value = getDictTypeQuery()
+  refetchDictTypes(getDictTypeQuery())
 }
 // 字典表格配置
 const columns = ref([
@@ -440,8 +439,7 @@ function showDataDrawer(row: any) {
   dataTitle.value = `字典配置 - ${row.dictType}`
   dictTypeId.value = row.id
   dataVisible.value = !dataVisible.value
-  dataQeuryVariables.value = getDictDataQuery()
-  loadDictDatas()
+  loadDictDatas(null, getDictDataQuery())
 }
 const dataSearchQuery = ref({
   dictValue: '',
@@ -515,7 +513,7 @@ const datas = computed(() => {
   dataPage.total = 0
   return []
 })
-const { load: loadDictDatas, result: dictDatas, loading: dictDatasLoading, variables: dataQeuryVariables } = dictDatasQuery
+const { load: loadDictDatas, result: dictDatas, loading: dictDatasLoading, refetch: refetchDictDatas } = dictDatasQuery
 
 function getDictDataQuery() {
   return {
@@ -535,7 +533,7 @@ function toSearchData () {
 }
 
 const changeDataPage = (page: any) => {
-  dataQeuryVariables.value = getDictDataQuery()
+  refetchDictDatas(getDictDataQuery())
 }
 
 function beforeCloseDataDrawer() {

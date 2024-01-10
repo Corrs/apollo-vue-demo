@@ -111,12 +111,9 @@ function toReset() {
   }
 }
 
-const { loading, load: loadLogs, result: logs, variables: qeuryVariables } = loginLogsQuery
+const { loading, load: loadLogs, result: logs, refetch: refetchLogs } = loginLogsQuery
 onMounted(() => {
-  qeuryVariables.value = {
-    cond: getQueryParams()
-  }
-  loadLogs()
+  loadLogs(null, { cond: getQueryParams() })
 })
 
 function getQueryParams() {
@@ -125,9 +122,9 @@ function getQueryParams() {
   const endTime = query.rangeTime[1]
   return {
     username: query.username,
-    status: query.status,
-    startTime,
-    endTime,
+    status: query.status === '' ? null : query.status,
+    startTime: startTime === '' ? null : startTime,
+    endTime: endTime === '' ? null : endTime,
     current: page.current,
     limit: page.limit
   }
@@ -179,20 +176,7 @@ const change = (page: any) => {
     warnMsg('请选择时间')
     return
   }
-  if (!cond.startTime) {
-    cond.startTime = null
-  }
-
-  if (!cond.endTime) {
-    cond.endTime = null
-  }
-
-  if (cond.status === '') {
-    cond.status = null
-  }
-  qeuryVariables.value = {
-    cond
-  }
+  refetchLogs({ cond })
 }
 </script>
 

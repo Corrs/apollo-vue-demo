@@ -97,10 +97,9 @@ const searchQuery = ref({
   rangeTime: [dateStr(now().subtract(7, 'day').startOf('d')), nowStr()]
 })
 
-const { loading, result: logs, variables: qeuryVariables, load: loadLogs } = operationLogsQuery
+const { loading, result: logs, refetch: refetchLogs, load: loadLogs } = operationLogsQuery
 onMounted(() => {
-  qeuryVariables.value = getQueryParams()
-  loadLogs()
+  loadLogs(null, getQueryParams())
 })
 
 function getQueryParams() {
@@ -113,9 +112,9 @@ function getQueryParams() {
       limit: page.limit
     },
     query: {
-      status: query.status,
-      startTime,
-      endTime
+      status: query.status === '' ? null : query.status,
+      startTime: startTime === '' ? null : startTime,
+      endTime: endTime === '' ? null : endTime
     }
   }
 }
@@ -163,18 +162,7 @@ const change = (page: any) => {
     warnMsg('请选择时间')
     return
   }
-  if (!query.startTime) {
-    query.startTime = null
-  }
-
-  if (!query.endTime) {
-    query.endTime = null
-  }
-
-  if (query.status === '') {
-    query.status = null
-  }
-  qeuryVariables.value = params
+  refetchLogs(params)
 }
 const dataSource = computed(() => {
   const data = logs.value?.operationLogs

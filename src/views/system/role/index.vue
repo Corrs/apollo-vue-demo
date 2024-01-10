@@ -154,10 +154,9 @@ const getRoleQuery = () => {
     }
   }
 }
-const { result: rolesResult, loading: rolesLoading, load: loadRoles, variables: rolesVariables } = rolesQuery
+const { result: rolesResult, loading: rolesLoading, load: loadRoles, refetch: refetchRoles } = rolesQuery
 onMounted(() => {
-  rolesVariables.value = getRoleQuery()
-  loadRoles()
+  loadRoles(null, getRoleQuery())
 })
 const page = reactive({ current: 1, limit: 10, total: 0, hideOnSinglePage: false, layout: ['count', 'prev', 'page', 'next', 'limits', 'skip'] })
 const columns = ref([
@@ -183,7 +182,7 @@ const dataSource = computed(() => {
   return []
 })
 const change = (page: any) => {
-  rolesVariables.value = getRoleQuery()
+  refetchRoles(getRoleQuery())
 }
 
 const formRules = ref({
@@ -271,7 +270,7 @@ function delRole(id: number) {
 const visible22 = ref(false)
 const showCheckbox2 = ref(true)
 const roleId = ref(0)
-const { onResult: rolePermsResult, load: loadRolePerms, variables: rolePermsVariables } = rolePermsQuery
+const { onResult: rolePermsResult, load: loadRolePerms } = rolePermsQuery
 const { mutate: assignPerms, loading: assignPermsLoading, onDone: assignPermsDone } = assignPermsMutation
 const checkedKeys2 = ref([])
 function toAssignPerms() {
@@ -301,10 +300,7 @@ rolePermsResult(queryResult => {
 })
 function toPrivileges(row: any) {
   // 根据roleId查询权限
-  rolePermsVariables.value = {
-    roleId: row.id
-  }
-  loadRolePerms()
+  loadRolePerms(null, {roleId: row.id})
   roleId.value = row.id
   visible22.value = true
 }

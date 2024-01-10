@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation, useQuery, provideApolloClient } from '@vue/apollo-composable'
+import { useLazyQuery, useMutation, provideApolloClient } from '@vue/apollo-composable'
 import { client } from '../apollo'
 import gql from 'graphql-tag'
 
@@ -84,16 +84,7 @@ export const loginLogsQuery = provideApolloClient(client)(() => useLazyQuery(gql
                 }
             }
         }
-    }`, {
-        cond: {
-            username: '',
-            status: null,
-            startTime: null,
-            endTime: null,
-            current: 1,
-            limit: 10
-        }
-    }
+    }`
 ))
 
 /**
@@ -124,17 +115,7 @@ export const operationLogsQuery = provideApolloClient(client)(() => useLazyQuery
                 }
             }
         }
-    }`, {
-        p: {
-            current: 1,
-            limit: 10
-        },
-        query: {
-            startTime: '',
-            endTime: '',
-            status: null
-        }
-    }
+    }`
 ))
 
 /**
@@ -168,17 +149,7 @@ const dictTypesGql = gql`
 /**
  * 字典管理分页查询
  */
-export const dictTypesQuery = provideApolloClient(client)(() => useLazyQuery(dictTypesGql, {
-        p: {
-            current: 1,
-            limit: 10
-        },
-        query: {
-            dictName: '',
-            dictType: ''
-        }
-    }
-))
+export const dictTypesQuery = provideApolloClient(client)(() => useLazyQuery(dictTypesGql))
 
 /**
  * 新增字典
@@ -242,18 +213,7 @@ const dictDatasGql = gql`
 /**
  * 字典数据分页查询
  */
-export const dictDatasQuery = provideApolloClient(client)(() => useLazyQuery(dictDatasGql, {
-    p: {
-        current: 1,
-        limit: 10
-    },
-    query: {
-        dictTypeId: 0,
-        dictLabel: '',
-        dictValue: ''
-    }
-}
-))
+export const dictDatasQuery = provideApolloClient(client)(() => useLazyQuery(dictDatasGql))
 
 /**
  * 新增字典数据
@@ -373,13 +333,7 @@ const rolesGql = gql`
 /**
  * 角色查询
  */
-export const rolesQuery = provideApolloClient(client)(() => useLazyQuery(rolesGql, {
-    p: {
-        current: 1,
-        limit: 10
-    },
-    roleName: '' 
-}))
+export const rolesQuery = provideApolloClient(client)(() => useLazyQuery(rolesGql))
 
 /**
  * 查询所有角色
@@ -443,9 +397,7 @@ export const assignPermsMutation = provideApolloClient(client)(() => useMutation
 export const rolePermsQuery = provideApolloClient(client)(() => useLazyQuery(gql`
     query rolePerms($roleId: Long!) {
         rolePerms(roleId: $roleId)
-    }`, {
-        roleId: 0
-    }
+    }`
 ))
 
 const usersGql = gql`
@@ -481,13 +433,7 @@ const usersGql = gql`
 /**
  * 分页查询用户
  */
-export const usersQuery = provideApolloClient(client)(() => useLazyQuery(usersGql, {
-    p: {
-        current: 1,
-        limit: 10
-    },
-    query: {}
-}))
+export const usersQuery = provideApolloClient(client)(() => useLazyQuery(usersGql))
 
 /**
  * 新增用户

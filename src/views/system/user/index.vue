@@ -174,12 +174,11 @@ import { now, dateStr } from '../../../library/dayUtil'
 import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
 const { result: rolesResult, load: loadRoles, refetch: refetchRoles } = roleListQuery
 const { result: dpetsResult, load: loadDepts, refetch: refetchDepts } = depts
-const { result: usersResult, load: loadUsers, loading, variables: qeuryVariables } = usersQuery
+const { result: usersResult, load: loadUsers, loading, refetch: refetchUsers } = usersQuery
 onMounted(() => {
   loadRoles() || refetchRoles()
   loadDepts() || refetchDepts()
-  qeuryVariables.value = getQueryParam()
-  loadUsers()
+  loadUsers(null, getQueryParam())
 })
 const deptTree = computed(() => {
   const list = dpetsResult.value?.depts
@@ -274,7 +273,7 @@ const columns = ref([
   }
 ])
 const change = (page: any) => {
-  qeuryVariables.value = getQueryParam()
+  refetchUsers(getQueryParam())
 }
 const dataSource = computed(() => {
   const data = usersResult.value?.users
