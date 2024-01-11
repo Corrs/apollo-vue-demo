@@ -24,14 +24,10 @@ export const depts = provideApolloClient(client)(() => useLazyQuery(DEPTS))
  */
 export const addDept = provideApolloClient(client)(() => useMutation(gql`
     mutation addDept($dept: AddDeptDTO!){ 
-        addDept(dept: $dept) {
-            id
-            name
-            pid
-            pname
-            sort
-        }
-    }`
+        addDept(dept: $dept)
+    }`, {
+        refetchQueries: ['depts']
+    }
 ))
 
 /**
@@ -40,7 +36,9 @@ export const addDept = provideApolloClient(client)(() => useMutation(gql`
 export const remDept = provideApolloClient(client)(() => useMutation(gql`
     mutation remDept($id: Long!){ 
         remDept(id: $id)
-    }`
+    }`, {
+        refetchQueries: ['depts']
+    }
 ))
 
 /**
@@ -48,14 +46,10 @@ export const remDept = provideApolloClient(client)(() => useMutation(gql`
  */
 export const editDept = provideApolloClient(client)(() => useMutation(gql`
     mutation editDept($dept: EditDeptDTO!){ 
-        editDept(dept: $dept) {
-            id
-            name
-            pid
-            pname
-            sort
-        }
-    }`
+        editDept(dept: $dept)
+    }`, {
+        refetchQueries: ['depts']
+    }
 ))
 
 /**
@@ -158,7 +152,7 @@ export const addDictTypeMutation = provideApolloClient(client)(() => useMutation
     mutation addDictType($dictType: AddDictTypeDTO!){ 
         addDictType(dictType: $dictType)
     }`, {
-        refetchQueries: [dictTypesGql, 'dictTypes']
+        refetchQueries: ['dictTypes']
     }
 ))
 
@@ -169,7 +163,7 @@ export const editDictTypeMutation = provideApolloClient(client)(() => useMutatio
     mutation editDictType($dictType: EditDictTypeDTO!){ 
         editDictType(dictType: $dictType)
     }`, {
-        refetchQueries: [dictTypesGql, 'dictTypes']
+        refetchQueries: ['dictTypes']
     }
 ))
 
@@ -180,7 +174,7 @@ export const remDictTypeMutation = provideApolloClient(client)(() => useMutation
     mutation remDictType($id: Long!){ 
         remDictType(id: $id)
     }`, {
-        refetchQueries: [dictTypesGql, 'dictTypes']
+        refetchQueries: ['dictTypes']
     }
 ))
 
@@ -222,7 +216,7 @@ export const addDictDataMutation = provideApolloClient(client)(() => useMutation
     mutation addDictData($dictData: AddDictDataDTO!){ 
         addDictData(dictData: $dictData)
     }`, {
-        refetchQueries: [dictDatasGql, 'dictDatas']
+        refetchQueries: ['dictDatas']
     }
 ))
 
@@ -233,7 +227,7 @@ export const editDictDataMutation = provideApolloClient(client)(() => useMutatio
     mutation editDictData($dictData: EditDictDataDTO!){ 
         editDictData(dictData: $dictData)
     }`, {
-        refetchQueries: [dictDatasGql, 'dictDatas']
+        refetchQueries: ['dictDatas']
     }
 ))
 
@@ -244,7 +238,7 @@ export const remDictDataMutation = provideApolloClient(client)(() => useMutation
     mutation remDictData($ids: [Long!]!){ 
         remDictData(ids: $ids)
     }`, {
-        refetchQueries: [dictDatasGql, 'dictDatas']
+        refetchQueries: ['dictDatas']
     }
 ))
 
@@ -278,7 +272,7 @@ export const addMenuMutation = provideApolloClient(client)(() => useMutation(gql
     mutation addMenu($menu: AddMenuDTO!) {
         addMenu(menu: $menu)
     }`, {
-        refetchQueries: [menusGql, 'menus']
+        refetchQueries: ['menus']
     }
 ))
 
@@ -289,7 +283,7 @@ export const editMenuMutation = provideApolloClient(client)(() => useMutation(gq
     mutation editMenu($menu: EditMenuDTO!) {
         editMenu(menu: $menu)
     }`, {
-        refetchQueries: [menusGql, 'menus']
+        refetchQueries: ['menus']
     }
 ))
 
@@ -300,7 +294,7 @@ export const remMenuMutation = provideApolloClient(client)(() => useMutation(gql
     mutation remMenu($id: Long!) {
         remMenu(id: $id)
     }`, {
-      refetchQueries: [menusGql, 'menus']  
+      refetchQueries: ['menus']  
     }
 ))
 
@@ -356,7 +350,7 @@ export const addRoleMutation = provideApolloClient(client)(() => useMutation(gql
     mutation addRole($role: AddRoleDTO!) {
         addRole(role: $role)
     }`, {
-        refetchQueries: [rolesGql, 'roles']
+        refetchQueries: ['roles']
     }
 ))
 
@@ -367,7 +361,7 @@ export const editRoleMutation = provideApolloClient(client)(() => useMutation(gq
     mutation editRole($role: EditRoleDTO!) {
         editRole(role: $role)
     }`, {
-        refetchQueries: [rolesGql, 'roles']
+        refetchQueries: ['roles']
     }
 ))
 
@@ -378,7 +372,7 @@ export const remRoleMutation = provideApolloClient(client)(() => useMutation(gql
     mutation remRole($id: Long!) {
         remRole(id: $id)
     }`, {
-        refetchQueries: [rolesGql, 'roles']
+        refetchQueries: ['roles']
     }
 ))
 
@@ -442,7 +436,7 @@ export const addUserMutation = provideApolloClient(client)(() => useMutation(gql
     mutation addUser($user:AddUserDTO!) {
         addUser(user: $user)
     }`, {
-        refetchQueries: [usersGql, 'users']
+        refetchQueries: ['users']
     }
 ))
 
@@ -452,7 +446,7 @@ export const addUserMutation = provideApolloClient(client)(() => useMutation(gql
 export const resetPasswordMutation = provideApolloClient(client)(() => useMutation(gql`
     mutation resetPassword($userId: Long!) {
         resetPassword(userId: $userId)
-    }`, {refetchQueries: [usersGql, 'users']}
+    }`, {refetchQueries: ['users']}
 ))
 
 /**
@@ -461,7 +455,7 @@ export const resetPasswordMutation = provideApolloClient(client)(() => useMutati
 export const remUserMutation = provideApolloClient(client)(() => useMutation(gql`
     mutation remUser($userId: Long!) {
         remUser(userId: $userId)
-    }`, {refetchQueries: [usersGql, 'users']}
+    }`, {refetchQueries: ['users']}
 ))
 
 /**
@@ -470,7 +464,7 @@ export const remUserMutation = provideApolloClient(client)(() => useMutation(gql
 export const chgUserStatusMutation = provideApolloClient(client)(() => useMutation(gql`
     mutation chgUserStatus($userId: Long!) {
         chgUserStatus(userId: $userId)
-    }`, {refetchQueries: [usersGql, 'users']}
+    }`, {refetchQueries: ['users']}
 ))
 
 /**
@@ -480,7 +474,7 @@ export const editUserMutation = provideApolloClient(client)(() => useMutation(gq
     mutation editUser($user: EditUserDTO!) {
         editUser(user: $user)
     }`,{
-        refetchQueries: [usersGql, 'users']
+        refetchQueries: ['users']
     }
 ))
 

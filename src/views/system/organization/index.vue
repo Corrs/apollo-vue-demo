@@ -63,7 +63,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { depts, addDept, DEPTS, remDept, editDept } from '../../../api/module/system'
+import { depts, addDept, remDept, editDept } from '../../../api/module/system'
 import { listToTree } from '../../../library/treeUtil'
 import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
 
@@ -82,8 +82,7 @@ const columns = ref([
 ])
 const { result: dpetsResult, loading: deptsLoading, load: loadDepts, refetch: refetchDepts } = depts
 onMounted(() => {
-  console.log('onMounted')
-  loadDepts()
+  loadDepts() || refetchDepts()
 })
 
 const dataSource = computed(() => {
@@ -148,8 +147,8 @@ const changeVisible11 = (text: any, row: any) => {
   visible11.value = !visible11.value
 }
 
-const { loading: addDeptLoading, mutate: addDeptMutate } = addDept
-const { loading: editDeptLoading, mutate: editDeptMutate } = editDept
+const { loading: addDeptLoading, mutate: addDeptMutate, onDone: addDeptDone } = addDept
+const { loading: editDeptLoading, mutate: editDeptMutate, onDone: editDeptDone } = editDept
 function toSubmit() {
   layFormRef11.value.validate((isValidate: any, model: any, errors: any) => {
     if (isValidate) {
@@ -157,22 +156,12 @@ function toSubmit() {
         // 编辑
         editDeptMutate({
           dept: model
-        }, {
-          update: (cache, { data: { editDept } }) => {
-            if (editDept) {
-              let data = cache.readQuery({ query: DEPTS })
-              const deptsCache = data.depts
-              const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === model.id), 1, editDept)
-              data = {
-                ...data,
-                depts: [
-                  ...depts
-                ],
-              }
-              successMsg('保存成功')
-              cache.writeQuery({ query: DEPTS, data })
+        })
+        editDeptDone(({ data: {  editDept } }) => {
+          if (editDept) {
+            successMsg('保存成功', () => {
               visible11.value = false
-            }
+            })
           }
         })
       } else {
@@ -183,19 +172,12 @@ function toSubmit() {
             pid: model.pid,
             sort: model.sort
           }
-        }, {
-          update: (cache, { data: { addDept } }) => {
-            let data = cache.readQuery({ query: DEPTS })
-            data = {
-              ...data,
-              depts: [
-                ...data.depts,
-                addDept,
-              ],
-            }
-            successMsg('保存成功')
-            cache.writeQuery({ query: DEPTS, data })
-            visible11.value = false
+        })
+        addDeptDone(({ data: {  addDept } }) => {
+          if (addDept) {
+            successMsg('保存成功', () => {
+              visible11.value = false
+            })
           }
         })
       }
@@ -206,7 +188,7 @@ function toCancel() {
   visible11.value = false
 }
 // 删除部门数据代码逻辑 start
-const { mutate: remDeptMutate } = remDept
+const { mutate: remDeptMutate, onDone: remDeptDone } = remDept
 function delDept(id: number) {
   // 需要查看是否有子部门，如果有子部门，不允许删除
   const list = dpetsResult.value?.depts
@@ -215,22 +197,9 @@ function delDept(id: number) {
   } else {
     confirm('确定要删除此组织吗?', () => {
       return new Promise<boolean>((resolve, reject) => {
-        remDeptMutate({id}, {
-          update: (cache, { data: { remDept } }) => {
-            if (remDept) {
-              let data = cache.readQuery({ query: DEPTS })
-              const deptsCache = data.depts
-              const depts = deptsCache.toSpliced(deptsCache.findIndex((e: any) => e.id === id), 1)
-              data = {
-                ...data,
-                depts: [
-                  ...depts
-                ],
-              }
-              successMsg('删除成功', () => resolve(true))
-              cache.writeQuery({ query: DEPTS, data })
-            }
-          }
+        remDeptMutate({id})
+        remDeptDone(({data: {remDept}}) => {
+          successMsg('删除成功', () => resolve(true))
         })
       })
     })
@@ -241,51 +210,4 @@ function delDept(id: number) {
 </script>
 
 <style scoped>
-.organization-box {
-  width: calc(100vw - 240px);
-  height: calc(100vh - 110px);
-  margin-top: 10px;
-  box-sizing: border-box;
-  background-color: #fff;
-  overflow: hidden;
-}
-.left-tree {
-  display: inline-block;
-  padding: 20px 15px 0 5px;
-  height: 1200px;
-  border-right: 1px solid #e6e6e6;
-  box-sizing: border-box;
-  position: relative;
-}
-/* todo layui-tree-entry 设置无效 */
-.layui-tree-entry {
-  position: relative;
-  padding: 10px 0;
-  height: 20px;
-  line-height: 20px;
-  white-space: nowrap;
-}
-.isFold {
-  position: absolute;
-  top: 36%;
-  right: -10px;
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
-  border-radius: 13px;
-  background-color: #fff;
-  border: 1px solid #e6e6e6;
-  cursor: pointer;
-}
-.search-input {
-  display: inline-block;
-  width: 98%;
-  margin-right: 10px;
-}
-
-.isChecked {
-  display: inline-block;
-  background-color: #e8f1ff;
-  color: red;
-}
-</style>../../../library/layerUtil
+</style>
