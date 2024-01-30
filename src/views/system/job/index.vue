@@ -178,7 +178,8 @@ function getQueryParams() {
 // 列表
 const { result: jobResult, loading, load: loadDynamicJobs, refetch: refetchDynamicJobs } = dynamicJobQuery
 onMounted(() => {
-  loadDynamicJobs(null, getQueryParams())
+  const params = getQueryParams()
+  loadDynamicJobs(null, params) || refetchDynamicJobs(params)
 })
 const dataSource = computed(() => {
   const data = jobResult.value?.dynamicJobs

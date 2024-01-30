@@ -178,7 +178,8 @@ const { result: usersResult, load: loadUsers, loading, refetch: refetchUsers } =
 onMounted(() => {
   loadRoles() || refetchRoles()
   loadDepts() || refetchDepts()
-  loadUsers(null, getQueryParam())
+  const params = getQueryParam()
+  loadUsers(null, params) || refetchUsers(params)
 })
 const deptTree = computed(() => {
   const list = dpetsResult.value?.depts

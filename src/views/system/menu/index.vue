@@ -120,9 +120,9 @@ import { listToTree } from '../../../library/treeUtil'
 import { successMsg, errorMsg, confirm } from '../../../library/layerUtil'
 
 // 列表
-const { result: menusResult, loading: menusLoading, load: loadMenu } = menusQuery
+const { result: menusResult, loading: menusLoading, load: loadMenu, refetch: refetchMenu } = menusQuery
 onMounted(() => {
-  loadMenu()
+  loadMenu() || refetchMenu()
 })
 const tableRef6 = ref()
 const columns6 = [

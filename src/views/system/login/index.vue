@@ -114,7 +114,8 @@ function toReset() {
 
 const { loading, load: loadLogs, result: logs, refetch: refetchLogs } = loginLogsQuery
 onMounted(() => {
-  loadLogs(null, { cond: getQueryParams() })
+  const cond = getQueryParams()
+  loadLogs(null, { cond }) || refetchLogs({ cond })
 })
 
 function getQueryParams() {
