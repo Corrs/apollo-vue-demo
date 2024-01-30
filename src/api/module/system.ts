@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation, provideApolloClient } from '@vue/apollo-composable'
+import { useLazyQuery, useMutation, provideApolloClient, useSubscription } from '@vue/apollo-composable'
 import { client } from '../apollo'
 import gql from 'graphql-tag'
 
@@ -563,4 +563,10 @@ export const switchDynamicJobMutation = provideApolloClient(client)(() => useMut
     }`,{
         refetchQueries: ['dynamicJobs']
     }
+))
+
+export const greetingSubscription = provideApolloClient(client)(() => useSubscription(gql`
+    subscription greeting {
+        greeting
+    }`
 ))

@@ -131,8 +131,16 @@
   </lay-container>
 </template>
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { layer } from '@layui/layui-vue'
+import { greetingSubscription } from '../../../api/module/system'
+
+const { result } = greetingSubscription
+
+onMounted(() => {
+  console.log(result)
+})
+
 const searchQuery = ref({
   filePath: '',
   flieName: '',

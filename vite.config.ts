@@ -35,6 +35,7 @@ export default defineConfig({
   define: {
     'process.env': {
       'BASE_URI': 'http://localhost:8080/graphql',
+      'WS_URI': 'ws://localhost:8080/graphql',
       'NODE_ENV': 'dev'
     }
   }

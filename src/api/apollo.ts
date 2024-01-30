@@ -1,10 +1,14 @@
-import { ApolloClient, createHttpLink, InMemoryCache, ApolloLink, concat } from '@apollo/client/core'
+import { ApolloClient, createHttpLink, InMemoryCache, ApolloLink, concat, split } from '@apollo/client/core'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
+import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
 import { errorMsg } from '../library/layerUtil'
 import { useUserStore } from '../store/user'
-import createUploadLink from "apollo-upload-client/createUploadLink.mjs"
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs'
 
 const BASE_URI = process.env.BASE_URI
+const WS_URI = process.env.WS_URI
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     const error = graphQLErrors[0]
@@ -41,6 +45,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 const httpLink = createHttpLink({ 
   uri: BASE_URI,
 })
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: WS_URI,
+  })
+)
 const authMiddleware = new ApolloLink((operation, forward) => {
   const user = localStorage.getItem('user')
   const captchaKey = localStorage.getItem('captchaKey')
@@ -57,10 +66,22 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 // Cache implementation
 const cache = new InMemoryCache()
+const link = split(
+  // split based on operation type
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return (
+      definition.kind === "OperationDefinition" &&
+      definition.operation === "subscription"
+    )
+  },
+  wsLink,
+  concat(authMiddleware, errorLink.concat(httpLink))
+)
 
 export const client = new ApolloClient({
-  cache: cache,
-  link: concat(authMiddleware, errorLink.concat(httpLink)),
+  cache,
+  link,
   name: 'aus-call-center-client',
   version: '1.3',
   queryDeduplication: false,
