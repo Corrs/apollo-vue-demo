@@ -83,6 +83,11 @@ export default [
         meta: { title: '文件管理', requireAuth: true },
       },
       {
+        path: '/system/job',
+        component: () => import('../../views/system/job/index.vue'),
+        meta: { title: '定时任务管理', requireAuth: true },
+      },
+      {
         path: '/system/login',
         component: () => import('../../views/system/login/index.vue'),
         meta: { title: '登录日志', requireAuth: true },

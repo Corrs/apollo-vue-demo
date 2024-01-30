@@ -92,8 +92,9 @@
 
     <lay-layer v-model="visible22" title="分配权限" :area="['500px', '450px']">
       <div style="height: 320px; overflow: auto">
+        <lay-checkbox name="like" skin="primary"  v-model="checkStrictly" value="1" label="是否级联选择" style="margin-left: 50px; margin-top: 5px;"></lay-checkbox>
         <lay-tree
-          :checkStrictly="true"
+          :checkStrictly="!checkStrictly"
           style="margin-left: 40px"
           :tail-node-icon="false"
           :data="perms"
@@ -267,6 +268,7 @@ function delRole(id: number) {
   })
 }
 
+const checkStrictly = ref(false)
 const visible22 = ref(false)
 const showCheckbox2 = ref(true)
 const roleId = ref(0)

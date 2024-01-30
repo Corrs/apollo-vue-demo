@@ -6,14 +6,15 @@
           <lay-col :md="8">
             <lay-form-item label-width="0">
               <lay-date-picker
-                :allow-clear="false"
+                allow-clear
                 size="sm"
                 v-model="searchQuery.rangeTime"
                 range
                 type="datetime"
                 style="width: 98%"
                 :placeholder="['开始时间', '结束时间']"
-              ></lay-date-picker
+              >
+              </lay-date-picker
             ></lay-form-item>
           </lay-col>
           <lay-col :md="5">
@@ -90,7 +91,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { now, dateStr, nowStr } from '../../../library/dayUtil'
 import { loginLogsQuery } from '../../../api/module/system'
 import { warnMsg } from '../../../library/layerUtil'
- 
+
 const searchQuery = ref({
   username: '',
   status: null,

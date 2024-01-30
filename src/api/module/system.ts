@@ -486,3 +486,81 @@ export const modifyPasswordMutation = provideApolloClient(client)(() => useMutat
         modifyPassword(pwd: $pwd)
     }
 `))
+
+/**
+ * 查询定时任务
+ */
+export const dynamicJobQuery = provideApolloClient(client)(() => useLazyQuery(gql`
+    query dynamicJobs($page: Page!, $query: DynamicJobQueryDTO!) {
+        dynamicJobs(page: $page, query: $query) {
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+            total
+            edges {
+                cursor
+                node {
+                    id
+                    jobName
+                    jobGroup
+                    jobClassName
+                    status
+                    jobData
+                    description
+                    triggerType
+                    triggerRule
+                    firstRuntime
+                    createTime
+                    updateTime
+                }
+            }
+        }
+    }
+`))
+
+/**
+ * 删除定时任务
+ */
+export const remDynamicJobMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation remDynamicJob($id: Long!) {
+        remDynamicJob(id: $id)
+    }`,{
+        refetchQueries: ['dynamicJobs']
+    }
+))
+
+/**
+ * 修改定时任务
+ */
+export const editDynamicJobMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation editDynamicJob($job: EditDynamicJobDTO!) {
+        editDynamicJob(job: $job)
+    }`,{
+        refetchQueries: ['dynamicJobs']
+    }
+))
+
+/**
+ * 新增定时任务
+ */
+export const addDynamicJobMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation addDynamicJob($job: AddDynamicJobDTO!) {
+        addDynamicJob(job: $job)
+    }`,{
+        refetchQueries: ['dynamicJobs']
+    }
+))
+
+/**
+ * 切换定时任务运行状态
+ */
+export const switchDynamicJobMutation = provideApolloClient(client)(() => useMutation(gql`
+    mutation switchDynamicJob($id: Long!) {
+        switchDynamicJob(id: $id)
+    }`,{
+        refetchQueries: ['dynamicJobs']
+    }
+))
