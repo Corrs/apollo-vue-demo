@@ -1,4 +1,4 @@
-import { ApolloClient, createHttpLink, InMemoryCache, ApolloLink, concat, split } from '@apollo/client/core'
+import { ApolloClient, createHttpLink, InMemoryCache, ApolloLink, concat, split, from } from '@apollo/client/core'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import { getMainDefinition } from '@apollo/client/utilities'
@@ -44,23 +44,30 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 const httpLink = createHttpLink({ 
   uri: BASE_URI,
+  includeExtensions: true,
 })
 const wsLink = new GraphQLWsLink(
   createClient({
     url: WS_URI,
+    connectionParams: () => {
+      const user = localStorage.getItem('user')
+      return new Promise<any>((resolve) => {
+        resolve({
+          userToken: user ? JSON.parse(user)?.token : ""
+        })
+      })
+    }
   })
 )
+
 const authMiddleware = new ApolloLink((operation, forward) => {
   const user = localStorage.getItem('user')
   const captchaKey = localStorage.getItem('captchaKey')
-  operation.setContext(({ headers = {} }) => ({
-    headers: {
-      ...headers,
-      timestamp: new Date().getTime(),
-      captchaKey: captchaKey ? captchaKey : "",
-      Authentication: user ? JSON.parse(user)?.token : ""
-    }
-  }))
+  operation.extensions = {
+    timestamp: new Date().getTime(),
+    captchaKey: captchaKey ? captchaKey : "",
+    Authentication: user ? JSON.parse(user)?.token : ""
+  }
   return forward(operation);
 })
 
@@ -75,8 +82,8 @@ const link = split(
       definition.operation === "subscription"
     )
   },
-  wsLink,
-  concat(authMiddleware, errorLink.concat(httpLink))
+  concat(authMiddleware, wsLink),
+  from([authMiddleware, errorLink, httpLink])
 )
 
 export const client = new ApolloClient({

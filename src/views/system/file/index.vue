@@ -135,12 +135,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { layer } from '@layui/layui-vue'
 import { greetingSubscription } from '../../../api/module/system'
 
-const { result } = greetingSubscription
-
-onMounted(() => {
-  console.log(result)
-})
-
 const searchQuery = ref({
   filePath: '',
   flieName: '',
@@ -154,6 +148,10 @@ function toImport() {
   visibleImport.value = true
 }
 function toReset() {
+  const { options, onResult } = greetingSubscription
+  onResult((result, context) => {
+    console.log(result.data)
+  })
   searchQuery.value = {
     filePath: '',
     flieName: '',
