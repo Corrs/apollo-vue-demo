@@ -131,7 +131,7 @@
   </lay-container>
 </template>
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { layer } from '@layui/layui-vue'
 import { greetingSubscription } from '../../../api/module/system'
 
@@ -147,11 +147,18 @@ function toImport() {
   // layer.msg('导入')
   visibleImport.value = true
 }
+
+const variables = reactive({id: 1})
 function toReset() {
-  const { options, onResult } = greetingSubscription
-  onResult((result, context) => {
-    console.log(result.data)
-  })
+  const { result } = greetingSubscription(variables)
+  watch(result, 
+    data => {
+      console.log("New message received:", data.greeting)
+    },
+    {
+      lazy: true // Don't immediately execute handler
+    }
+  )
   searchQuery.value = {
     filePath: '',
     flieName: '',
@@ -160,6 +167,7 @@ function toReset() {
 }
 
 function toSearch() {
+  variables.id=2
   page.current = 1
   change(page)
 }

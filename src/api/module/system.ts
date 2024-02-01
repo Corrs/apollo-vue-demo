@@ -565,8 +565,11 @@ export const switchDynamicJobMutation = provideApolloClient(client)(() => useMut
     }
 ))
 
-export const greetingSubscription = provideApolloClient(client)(() => useSubscription(gql`
-    subscription greeting {
-        greeting
-    }`
-))
+export const greetingSubscription = (variables: any) => {
+    return provideApolloClient(client)(() => useSubscription(gql`
+        subscription greeting($id: Int) {
+            greeting(id: $id)
+        }`, 
+        variables
+    ))
+}

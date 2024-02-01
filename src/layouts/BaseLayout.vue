@@ -118,14 +118,24 @@
                 ></lay-icon>
               </lay-fullscreen>
             </lay-menu-item> -->
-            <!-- <lay-menu-item>
-              <global-message-tab :flag="flag">
+            <lay-menu-item>
+              <div class="message-notice">
+                <lay-badge v-show="noticeStore.hasNewNotice" class="message-notice-badge" type="dot"></lay-badge>
                 <lay-icon
                   type="layui-icon-notice"
                   @click="changeDropdown"
                 ></lay-icon>
-              </global-message-tab>
-            </lay-menu-item> -->
+              </div>
+              <!-- <global-message-tab :flag="flag">
+                <div class="message-notice">
+                  <lay-badge class="message-notice-badge" type="dot"></lay-badge>
+                  <lay-icon
+                    type="layui-icon-notice"
+                    @click="changeDropdown"
+                  ></lay-icon>
+                </div>
+              </global-message-tab> -->
+            </lay-menu-item>
             <!-- <lay-menu-item>
               <lay-dropdown updateAtScroll placement="bottom">
                 <lay-icon type="layui-icon-website"></lay-icon>
@@ -192,6 +202,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useAppStore } from '../store/app'
 import { useUserStore } from '../store/user'
+import { useNoticeStore } from '../store/notice'
 import GlobalSetup from './global/GlobalSetup.vue'
 import GlobalContent from './global/GlobalContent.vue'
 import GlobalBreadcrumb from './global/GlobalBreadcrumb.vue'
@@ -218,6 +229,7 @@ export default {
   setup() {
     const appStore = useAppStore()
     const userInfoStore = useUserStore()
+    const noticeStore = useNoticeStore()
     const fullscreenRef = ref()
     const visible = ref(false)
     const sideWidth = computed(() =>
@@ -296,6 +308,7 @@ export default {
       mainSelectedKey,
       fullscreenRef,
       appStore,
+      noticeStore,
       visible,
       menus,
       mainMenus,
@@ -452,6 +465,14 @@ export default {
       height: 32px !important;
       line-height: 32px !important;
     }
+  }
+}
+
+.message-notice {
+  .message-notice-badge {
+    position: absolute;
+    top: 10px;
+    right: 15px;
   }
 }
 </style>
