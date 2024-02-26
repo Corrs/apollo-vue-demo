@@ -38,7 +38,8 @@ function processGrapgQLError(graphQLErrors: any) {
       const userInfoStore = useUserStore()
       userInfoStore.logout()
       // 这里没有办法用vue-router
-      window.location.hash = '/login'
+      // window.location.hash = '/login'
+      window.location.reload()
     })
   } else if (classification === 'FORBIDDEN') {
     const path = error.path?.values()?.next()?.value
